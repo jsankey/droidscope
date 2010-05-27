@@ -64,4 +64,20 @@
     -->
     <setup />
 
+    <target name="start-emulator">
+        <exec executable="${sdk.dir}/tools/emulator" spawn="true">
+	    <arg line="-avd ${avd} -no-window"/>
+	</exec>
+	<exec executable="${sdk.dir}/tools/adb">
+	    <arg line="-e wait-for-device"/>
+	</exec>
+    </target>
+
+    <target name="stop-emulator">
+	<exec executable="killall">
+	    <arg line="emulator"/>
+	</exec>
+    </target>
+
+    <target name="ci" depends="start-emulator,run-tests,stop-emulator"/>
 </project>
