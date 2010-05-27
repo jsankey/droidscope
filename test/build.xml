@@ -80,9 +80,5 @@
 	</exec>
     </target>
 
-    <target name="install-app">
-        <ant dir="${tested.project.dir}" target="install"/>
-    </target>
-
-    <target name="ci" depends="stop-emulator,start-emulator,install-app,run-tests,stop-emulator"/>
+    <target name="ci" depends="stop-emulator,start-emulator,run-tests,stop-emulator"/>
 </project>
