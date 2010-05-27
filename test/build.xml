@@ -71,7 +71,7 @@
 	<exec executable="${sdk.dir}/tools/adb">
 	    <arg line="-e wait-for-device"/>
 	</exec>
-        <sleep seconds="10"/>
+        <sleep seconds="5"/>
     </target>
 
     <target name="stop-emulator">
@@ -80,5 +80,9 @@
 	</exec>
     </target>
 
-    <target name="ci" depends="start-emulator,run-tests,stop-emulator"/>
+    <target name="install-app">
+        <ant dir="${tested.project.dir}" target="install"/>
+    </target>
+
+    <target name="ci" depends="stop-emulator,start-emulator,install-app,run-tests,stop-emulator"/>
 </project>
