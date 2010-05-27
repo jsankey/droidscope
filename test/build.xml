@@ -71,6 +71,7 @@
 	<exec executable="${sdk.dir}/tools/adb">
 	    <arg line="-e wait-for-device"/>
 	</exec>
+        <sleep seconds="10"/>
     </target>
 
     <target name="stop-emulator">
