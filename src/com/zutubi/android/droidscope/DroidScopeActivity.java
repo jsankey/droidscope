@@ -10,7 +10,9 @@ import org.xmlrpc.android.XMLRPCException;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.KeyguardManager;
 import android.app.ProgressDialog;
+import android.app.KeyguardManager.KeyguardLock;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,6 +35,8 @@ import com.zutubi.android.droidscope.ProjectState.Health;
  */
 public class DroidScopeActivity extends Activity implements OnSharedPreferenceChangeListener
 {
+    public static final String PROPERTY_TEST_MODE = "droidscope.test";
+    
     private ISettings                  settings;
     private ArrayAdapter<ProjectState> adapter;
     private IPulseClient               client;
@@ -42,6 +46,14 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+    
+        if (Boolean.getBoolean(PROPERTY_TEST_MODE))
+        {
+            KeyguardManager keyGuardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+            KeyguardLock lock = keyGuardManager.newKeyguardLock(getClass().getName());
+            lock.disableKeyguard();
+        }
+        
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(this);
         settings = new PreferencesSettings(preferences);
@@ -94,7 +106,8 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
                         {
                             visibleDialog = null;
                         }
-                    }).show();
+                    }).create();
+            visibleDialog.show();
             return false;
         }
         else
@@ -222,7 +235,8 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
                                     {
                                         visibleDialog = null;
                                     }
-                                }).show();
+                                }).create();
+                visibleDialog.show();
             }
             else
             {

@@ -14,25 +14,27 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
 
-import com.zutubi.android.droidscope.ISettings;
-import com.zutubi.android.droidscope.R;
 import com.zutubi.android.droidscope.DroidScopeActivity;
 import com.zutubi.android.droidscope.IPulseClient;
+import com.zutubi.android.droidscope.ISettings;
+import com.zutubi.android.droidscope.R;
 
 public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<DroidScopeActivity>
 {
-    private DroidScopeActivity      activity;
-    private View            list;
-    private FakePulseClient client;
+    private DroidScopeActivity activity;
+    private View               list;
+    private FakePulseClient    client;
 
     public DroidScopeActivityTest()
     {
         super("com.zutubi.android.droidscope", DroidScopeActivity.class);
+        System.setProperty(DroidScopeActivity.PROPERTY_TEST_MODE, Boolean.TRUE.toString());
     }
 
     @Override
     protected void setUp() throws Exception
     {
+        getInstrumentation().setInTouchMode(false);
         activity = getActivity();
         activity.setSettings(new FakeSettings("http://localhost", "admin", "admin"));
         list = activity.findViewById(R.id.list);
@@ -84,6 +86,7 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         {
             if (activity.getVisibleDialog() == null)
             {
+                getInstrumentation().waitForIdleSync();
                 return;
             }
 

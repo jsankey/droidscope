@@ -7,7 +7,7 @@
 	</application>
 
 	<uses-sdk android:minSdkVersion="4" />
-
+	
 	<instrumentation android:targetPackage="com.zutubi.android.droidscope"
 		android:name="android.test.InstrumentationTestRunner" />
 </manifest> 
