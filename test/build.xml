@@ -89,7 +89,7 @@
         </exec>
     </target>
 
-    <property name="emulator.pid.file" value="${out.dir}/emulator.properties"/>
+    <property name="emulator.pid.file" value="emulator.properties"/>
     <target name="start-emulator">
         <exec executable="bash" spawn="true">
 	    <arg line="./exec.sh ${emulator.pid.file} emulator.pid ${sdk.dir}/tools/emulator -avd ${avd} -no-window -port ${emulator.port}"/>
@@ -105,6 +105,7 @@
 	<exec executable="kill">
 	    <arg line="${emulator.pid}"/>
 	</exec>
+	<delete file="${emulator.pid.file}"/>
     </target>
 
     <target name="ci" depends="start-emulator,run-tests,stop-emulator"/>
