@@ -34,6 +34,11 @@
          should be checked in in Version Control Systems. -->
     <property file="default.properties" />
 
+    <!-- Can be overridden if you want multiple emulators running.  Must be even, and between
+         5554 and 5584. -->
+    <property name="emulator.port" value="5554"/>
+    <property name="adb.device.arg" value="-s emulator-${emulator.port}"/>
+
     <!-- Custom Android task to deal with the project target, and import the proper rules.
          This requires ant 1.6.0 or above. -->
     <path id="android.antlibs">

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="test" default="help">
-
     <!-- The local.properties file is created and updated by the 'android' tool.
          It contains the path to the SDK. It should *NOT* be checked in in Version
          Control Systems. -->
@@ -34,6 +33,11 @@
          should be checked in in Version Control Systems. -->
     <property file="default.properties" />
 
+    <!-- Can be overridden if you want multiple emulators running.  Must be even, and between
+         5554 and 5584. -->
+    <property name="emulator.port" value="5554"/>
+    <property name="adb.device.arg" value="-s emulator-${emulator.port}"/>
+
     <!-- Custom Android task to deal with the project target, and import the proper rules.
          This requires ant 1.6.0 or above. -->
     <path id="android.antlibs">
@@ -64,21 +68,44 @@
     -->
     <setup />
 
+    <!-- The default android test compiling rules assume your tested project uses a default
+	 out.dir.  We instead assume it is the same as our own (a little lazy - we could
+	 also load it, but it seems too much effort to support inconsistent paths). -->
+    <property name="extensible.classpath" value="${tested.project.absolute.dir}/${out.dir}/classes"/>
+
+    <!-- Overrides the default android rule to respect ${adb.device.arg}. -->
+    <target name="run-tests" depends="-install-tested-project, install"
+                description="Runs tests from the package defined in test.package property">
+        <exec executable="${adb}" failonerror="true">
+	    <arg line="${adb.device.arg}"/>
+            <arg value="shell" />
+            <arg value="am" />
+            <arg value="instrument" />
+            <arg value="-w" />
+            <arg value="-e" />
+            <arg value="coverage" />
+            <arg value="@{emma.enabled}" />
+            <arg value="${manifest.package}/${test.runner}" />
+        </exec>
+    </target>
+
+    <property name="emulator.pid.file" value="${out.dir}/emulator.properties"/>
     <target name="start-emulator">
-        <exec executable="${sdk.dir}/tools/emulator" spawn="true">
-	    <arg line="-avd ${avd} -no-window"/>
+        <exec executable="bash" spawn="true">
+	    <arg line="./exec.sh ${emulator.pid.file} emulator.pid ${sdk.dir}/tools/emulator -avd ${avd} -no-window -port ${emulator.port}"/>
 	</exec>
 	<exec executable="${sdk.dir}/tools/adb">
-	    <arg line="-e wait-for-device"/>
+	    <arg line="${adb.device.arg} -e wait-for-device"/>
 	</exec>
         <sleep seconds="5"/>
     </target>
 
     <target name="stop-emulator">
-	<exec executable="killall">
-	    <arg line="emulator"/>
+	<property file="${emulator.pid.file}"/>
+	<exec executable="kill">
+	    <arg line="${emulator.pid}"/>
 	</exec>
     </target>
 
-    <target name="ci" depends="stop-emulator,start-emulator,run-tests,stop-emulator"/>
+    <target name="ci" depends="start-emulator,run-tests,stop-emulator"/>
 </project>
