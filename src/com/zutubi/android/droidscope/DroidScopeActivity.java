@@ -1,7 +1,6 @@
 package com.zutubi.android.droidscope;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +26,12 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.zutubi.android.droidscope.ProjectState.Health;
+import com.zutubi.android.libpulse.Health;
+import com.zutubi.android.libpulse.IPulse;
+import com.zutubi.android.libpulse.ProjectStatus;
+import com.zutubi.android.libpulse.internal.IPulseClient;
+import com.zutubi.android.libpulse.internal.Pulse;
+import com.zutubi.android.libpulse.internal.PulseClient;
 
 /**
  * The main activity for DroidScope: shows a list of projects with their health
@@ -37,10 +41,10 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
 {
     public static final String PROPERTY_TEST_MODE = "droidscope.test";
     
-    private ISettings                  settings;
-    private ArrayAdapter<ProjectState> adapter;
-    private IPulseClient               client;
-    private Dialog                     visibleDialog;
+    private ISettings                   settings;
+    private ArrayAdapter<ProjectStatus> adapter;
+    private IPulse                      pulse;
+    private Dialog                      visibleDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -59,7 +63,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         settings = new PreferencesSettings(preferences);
         setContentView(R.layout.main);
         ListView list = (ListView) findViewById(R.id.list);
-        adapter = new ArrayAdapter<ProjectState>(this, R.layout.project);
+        adapter = new ArrayAdapter<ProjectStatus>(this, R.layout.project);
         list.setAdapter(adapter);
     }
 
@@ -121,16 +125,16 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     {
         try
         {
-            if (client != null)
+            if (pulse != null)
             {
-                client.close();
+                pulse.close();
             }
         }
         catch (IOException e)
         {
         }
 
-        client = null;
+        pulse = null;
         settings = new PreferencesSettings(preferences);
     }
 
@@ -139,9 +143,9 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         return visibleDialog;
     }
 
-    public void setClient(IPulseClient client)
+    public void setPulse(IPulse pulse)
     {
-        this.client = client;
+        this.pulse = pulse;
     }
 
     public void setSettings(ISettings settings)
@@ -163,48 +167,19 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         @Override
         protected RefreshResult doInBackground(Object... params)
         {
-            if (client == null)
+            if (pulse == null)
             {
-                client = new PulseClient(settings);
+                pulse = new Pulse(new PulseClient(settings.getURL(), settings.getUsername(), settings.getPassword()));
             }
 
             try
             {
-                List<ProjectState> result = new LinkedList<ProjectState>();
-                Object[] projects = client.getAllProjectNames();
-                for (Object project : projects)
-                {
-                    String projectName = (String) project;
-                    result.add(new ProjectState(projectName, getProjectHealth(client, projectName)));
-                }
-
+                List<ProjectStatus> result = pulse.getAllProjectStatuses();
                 return new RefreshResult(result);
             }
-            catch (XMLRPCException e)
+            catch (RuntimeException e)
             {
                 return new RefreshResult(e);
-            }
-        }
-
-        private Health getProjectHealth(IPulseClient client, String projectName) throws XMLRPCException
-        {
-            Object[] builds = client.getLatestBuildsForProject(projectName, true, 1);
-            if (builds.length == 0)
-            {
-                return Health.UNKNOWN;
-            }
-            else
-            {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> build = (Map<String, Object>) builds[0];
-                if ((Boolean) build.get("succeeded"))
-                {
-                    return Health.OK;
-                }
-                else
-                {
-                    return Health.BROKEN;
-                }
             }
         }
 
@@ -212,9 +187,9 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         protected void onPostExecute(RefreshResult result)
         {
             adapter.clear();
-            if (result.states != null)
+            if (result.statuses != null)
             {
-                for (ProjectState state : result.states)
+                for (ProjectStatus state : result.statuses)
                 {
                     adapter.add(state);
                 }
@@ -248,15 +223,15 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
 
     private static class RefreshResult
     {
-        private List<ProjectState> states;
-        private XMLRPCException    error;
+        private List<ProjectStatus> statuses;
+        private Exception           error;
 
-        public RefreshResult(List<ProjectState> states)
+        public RefreshResult(List<ProjectStatus> statuses)
         {
-            this.states = states;
+            this.statuses = statuses;
         }
 
-        public RefreshResult(XMLRPCException error)
+        public RefreshResult(Exception error)
         {
             this.error = error;
         }

@@ -3,6 +3,8 @@ package com.zutubi.android.droidscope.test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import org.xmlrpc.android.XMLRPCException;
@@ -15,15 +17,19 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.zutubi.android.droidscope.DroidScopeActivity;
-import com.zutubi.android.droidscope.IPulseClient;
 import com.zutubi.android.droidscope.ISettings;
 import com.zutubi.android.droidscope.R;
+import com.zutubi.android.libpulse.BuildResult;
+import com.zutubi.android.libpulse.IPulse;
+import com.zutubi.android.libpulse.ProjectStatus;
+import com.zutubi.android.libpulse.ResultStatus;
+import com.zutubi.android.libpulse.internal.IPulseClient;
 
 public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<DroidScopeActivity>
 {
     private DroidScopeActivity activity;
     private View               list;
-    private FakePulseClient    client;
+    private FakePulse          pulse;
 
     public DroidScopeActivityTest()
     {
@@ -38,8 +44,8 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         activity = getActivity();
         activity.setSettings(new FakeSettings("http://localhost", "admin", "admin"));
         list = activity.findViewById(R.id.list);
-        client = new FakePulseClient();
-        activity.setClient(client);
+        pulse = new FakePulse();
+        activity.setPulse(pulse);
     }
 
     public void testIncompleteSettings() throws Throwable
@@ -60,18 +66,18 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         getInstrumentation().waitForIdleSync();
         ProgressDialog progressDialog = (ProgressDialog) activity.getVisibleDialog();
         assertNotNull(progressDialog);
-        client.releaseGetAllProjectNames();
+        pulse.releaseGetAllProjectStatuses();
         waitForDialogToDisappear();
         assertEquals(0, list.getTouchables().size());
     }
 
     public void testProjects() throws Throwable
     {
-        client.setProjectNames("p1", "p2");
+        pulse.setProjectNames("p1", "p2");
 
         sendKeys(KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_R);
         getInstrumentation().waitForIdleSync();
-        client.releaseGetAllProjectNames();
+        pulse.releaseGetAllProjectStatuses();
         waitForDialogToDisappear();
         ArrayList<View> listItems = list.getTouchables();
         assertEquals(2, listItems.size());
@@ -134,36 +140,46 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         }
     }
 
-    private static class FakePulseClient implements IPulseClient
+    private static class FakePulse implements IPulse
     {
-        private Semaphore getAllProjectNamesFlag = new Semaphore(0);
-        private Object[]  projectNames           = new Object[0];
+        private Semaphore getAllProjectStatusesFlag = new Semaphore(0);
+        private String[]  projectNames              = new String[0];
 
         @Override
-        public Object[] getAllProjectNames() throws XMLRPCException
+        public List<ProjectStatus> getAllProjectStatuses()
         {
             try
             {
-                getAllProjectNamesFlag.acquire();
-                return projectNames;
+                getAllProjectStatusesFlag.acquire();
+                return getProjectStatuses(projectNames);
             }
             catch (InterruptedException e)
             {
-                throw new XMLRPCException(e);
+                throw new RuntimeException(e);
             }
         }
 
-        @Override
-        public Object[] getLatestBuildsForProject(String projectName, boolean completedOnly, int maxResults) throws XMLRPCException
+        private List<ProjectStatus> getProjectStatuses(String[] names)
         {
-            HashMap<String, Object> build = new HashMap<String, Object>();
-            build.put("succeeded", true);
-            return new Object[] { build };
+            List<ProjectStatus> statuses = new LinkedList<ProjectStatus>();
+            for (String name: names)
+            {
+                statuses.add(new ProjectStatus(name, new BuildResult(1, ResultStatus.SUCCESS, 100), null));
+            }
+            
+            return statuses;
         }
 
-        public void releaseGetAllProjectNames()
+        @Override
+        public List<ProjectStatus> getMyProjectStatuses()
         {
-            getAllProjectNamesFlag.release();
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public void releaseGetAllProjectStatuses()
+        {
+            getAllProjectStatusesFlag.release();
         }
 
         public void setProjectNames(String... projectNames)
@@ -175,5 +191,6 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         public void close() throws IOException
         {
         }
+
     }
 }

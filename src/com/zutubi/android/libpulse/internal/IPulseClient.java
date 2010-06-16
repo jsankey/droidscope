@@ -1,4 +1,4 @@
-package com.zutubi.android.droidscope;
+package com.zutubi.android.libpulse.internal;
 
 import java.io.Closeable;
 
@@ -11,12 +11,21 @@ import org.xmlrpc.android.XMLRPCException;
 public interface IPulseClient extends Closeable
 {
     /**
+     * Retrieves the names of all projects selected by the logged in user for
+     * display on their dashboard.
+     * 
+     * @return an array of the user's selected project names
+     * @throws XMLRPCException on error
+     */
+    String[] getMyProjectNames() throws XMLRPCException;
+
+    /**
      * Retrieves the names of all concrete projects configured on the server.
      * 
      * @return an array of all project names
      * @throws XMLRPCException on error
      */
-    Object[] getAllProjectNames() throws XMLRPCException;
+    String[] getAllProjectNames() throws XMLRPCException;
 
     /**
      * Retrieves details of the latest builds for a named project.  Builds are

@@ -1,4 +1,4 @@
-package com.zutubi.android.droidscope;
+package com.zutubi.android.libpulse.internal;
 
 import java.io.IOException;
 
@@ -22,9 +22,8 @@ public class PulseClient implements IPulseClient
     private String            token;
     private long              tokenTimestamp;
 
-    public PulseClient(ISettings settings)
+    public PulseClient(String url, String username, String password)
     {
-        String url = settings.getURL();
         if (!url.endsWith("/"))
         {
             url += "/";
@@ -32,23 +31,44 @@ public class PulseClient implements IPulseClient
         url += "xmlrpc";
 
         this.client = new XMLRPCClient(url);
-        this.username = settings.getUsername();
-        this.password = settings.getPassword();
+        this.username = username;
+        this.password = password;
     }
 
     /**
-     * @see com.zutubi.android.droidscope.IPulseClient#getAllProjectNames()
+     * @see com.zutubi.android.libpulse.internal.IPulseClient#getMyProjectNames()
      */
-    public Object[] getAllProjectNames() throws XMLRPCException
+    @Override
+    public String[] getMyProjectNames() throws XMLRPCException
     {
         ensureToken();
-        return doCall("RemoteApi.getAllProjectNames", token);
+        Object[] names = doCall("RemoteApi.getMyProjectNames", token);
+        return convertStrings(names);
     }
 
     /**
-     * @see com.zutubi.android.droidscope.IPulseClient#getLatestBuildsForProject(java.lang.String,
+     * @see com.zutubi.android.libpulse.internal.IPulseClient#getAllProjectNames()
+     */
+    @Override
+    public String[] getAllProjectNames() throws XMLRPCException
+    {
+        ensureToken();
+        Object[] names = doCall("RemoteApi.getAllProjectNames", token);
+        return convertStrings(names);
+    }
+
+    private String[] convertStrings(Object[] objects)
+    {
+        String[] strings = new String[objects.length];
+        System.arraycopy(objects, 0, strings, 0, objects.length);
+        return strings;
+    }
+
+    /**
+     * @see com.zutubi.android.libpulse.internal.IPulseClient#getLatestBuildsForProject(java.lang.String,
      *      boolean, int)
      */
+    @Override
     public Object[] getLatestBuildsForProject(String projectName, boolean completedOnly, int maxResults) throws XMLRPCException
     {
         ensureToken();
