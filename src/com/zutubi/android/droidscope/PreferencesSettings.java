@@ -8,6 +8,10 @@ import android.content.SharedPreferences;
  */
 public class PreferencesSettings implements ISettings
 {
+    public static final String PROPERTY_PASSWORD = "password";
+    public static final String PROPERTY_URL = "url";
+    public static final String PROPERTY_USERNAME = "username";
+    
     private SharedPreferences preferences;
 
     public PreferencesSettings(SharedPreferences preferences)
@@ -18,18 +22,18 @@ public class PreferencesSettings implements ISettings
     @Override
     public String getURL()
     {
-        return preferences.getString("url", "");
+        return preferences.getString(PROPERTY_URL, "");
     }
 
     @Override
     public String getUsername()
     {
-        return preferences.getString("username", "");
+        return preferences.getString(PROPERTY_USERNAME, "");
     }
 
     @Override
     public String getPassword()
     {
-        return preferences.getString("password", "");
+        return preferences.getString(PROPERTY_PASSWORD, "");
     }
 }

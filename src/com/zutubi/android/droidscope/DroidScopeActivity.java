@@ -2,9 +2,6 @@ package com.zutubi.android.droidscope;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-
-import org.xmlrpc.android.XMLRPCException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -16,20 +13,23 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
+import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
-import com.zutubi.android.libpulse.Health;
 import com.zutubi.android.libpulse.IPulse;
 import com.zutubi.android.libpulse.ProjectStatus;
-import com.zutubi.android.libpulse.internal.IPulseClient;
 import com.zutubi.android.libpulse.internal.Pulse;
 import com.zutubi.android.libpulse.internal.PulseClient;
 
@@ -40,6 +40,8 @@ import com.zutubi.android.libpulse.internal.PulseClient;
 public class DroidScopeActivity extends Activity implements OnSharedPreferenceChangeListener
 {
     public static final String PROPERTY_TEST_MODE = "droidscope.test";
+    
+    private static final int ID_CONNECTION_DIALOG = 1;
     
     private ISettings                   settings;
     private ArrayAdapter<ProjectStatus> adapter;
@@ -64,7 +66,71 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         setContentView(R.layout.main);
         ListView list = (ListView) findViewById(R.id.list);
         adapter = new ArrayAdapter<ProjectStatus>(this, R.layout.project);
-        list.setAdapter(adapter);
+        list.setAdapter(adapter);        
+    }
+    
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        
+        if (settingsIncomplete())
+        {
+            showDialog(ID_CONNECTION_DIALOG);
+        }
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id)
+    {
+        switch (id)
+        {
+            case ID_CONNECTION_DIALOG:
+            {
+                LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                View layout = inflater.inflate(R.layout.connection, (ViewGroup) findViewById(R.id.connection_root));
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.connection);
+                builder.setView(layout);
+                builder.setPositiveButton(android.R.string.ok, new OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        AlertDialog alertDialog = (AlertDialog) dialog;
+                        CharSequence url = ((TextView) alertDialog.findViewById(R.id.connection_pulse_url)).getText();
+                        CharSequence username = ((TextView) alertDialog.findViewById(R.id.connection_username)).getText();
+                        CharSequence password = ((TextView) alertDialog.findViewById(R.id.connection_password)).getText();
+
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(DroidScopeActivity.this);
+                        Editor editor = preferences.edit();
+                        editor.putString(PreferencesSettings.PROPERTY_URL, url.toString());
+                        editor.putString(PreferencesSettings.PROPERTY_USERNAME, username.toString());
+                        editor.putString(PreferencesSettings.PROPERTY_PASSWORD, password.toString());
+                        editor.commit();
+                        
+                        hideDialog();
+                    }
+                });
+
+                builder.setNegativeButton(android.R.string.cancel, new OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        hideDialog();
+                    }
+                });
+                
+                AlertDialog dialog = builder.create();
+                visibleDialog = dialog;
+                return dialog;
+            }
+            default:
+            {
+                return null;
+            }
+        }
     }
 
     @Override
@@ -99,7 +165,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
 
     private boolean checkSettings()
     {
-        if (settings.getURL().length() == 0 || settings.getUsername().length() == 0)
+        if (settingsIncomplete())
         {
             visibleDialog = new AlertDialog.Builder(this).setTitle(R.string.error).setMessage(
                     getText(R.string.error_settings_incomplete)).setPositiveButton(android.R.string.ok,
@@ -118,6 +184,11 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         {
             return true;
         }
+    }
+
+    private boolean settingsIncomplete()
+    {
+        return settings.getURL().length() == 0 || settings.getUsername().length() == 0;
     }
 
     @Override
@@ -141,6 +212,12 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     public Dialog getVisibleDialog()
     {
         return visibleDialog;
+    }
+
+    public void hideDialog()
+    {
+        visibleDialog.hide();
+        visibleDialog = null;
     }
 
     public void setPulse(IPulse pulse)
@@ -195,8 +272,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
                 }
 
                 adapter.notifyDataSetChanged();
-                visibleDialog.hide();
-                visibleDialog = null;
+                hideDialog();
             }
             else if (result.error != null)
             {
@@ -215,8 +291,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
             }
             else
             {
-                visibleDialog.hide();
-                visibleDialog = null;
+                hideDialog();
             }
         }
     }

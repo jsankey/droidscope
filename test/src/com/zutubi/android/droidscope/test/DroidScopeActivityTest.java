@@ -1,13 +1,6 @@
 package com.zutubi.android.droidscope.test;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Semaphore;
-
-import org.xmlrpc.android.XMLRPCException;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -19,11 +12,6 @@ import android.widget.TextView;
 import com.zutubi.android.droidscope.DroidScopeActivity;
 import com.zutubi.android.droidscope.ISettings;
 import com.zutubi.android.droidscope.R;
-import com.zutubi.android.libpulse.BuildResult;
-import com.zutubi.android.libpulse.IPulse;
-import com.zutubi.android.libpulse.ProjectStatus;
-import com.zutubi.android.libpulse.ResultStatus;
-import com.zutubi.android.libpulse.internal.IPulseClient;
 
 public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<DroidScopeActivity>
 {
@@ -40,9 +28,25 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
     @Override
     protected void setUp() throws Exception
     {
-        getInstrumentation().setInTouchMode(false);
+        super.setUp();
+        
+        setActivityInitialTouchMode(false);
         activity = getActivity();
         activity.setSettings(new FakeSettings("http://localhost", "admin", "admin"));
+        activity.runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if (activity.getVisibleDialog() != null)
+                {
+                    activity.hideDialog();
+                }
+            }
+        });
+
+        getInstrumentation().waitForIdleSync();
+
         list = activity.findViewById(R.id.list);
         pulse = new FakePulse();
         activity.setPulse(pulse);
@@ -59,7 +63,7 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         assertNotNull(messageView);
         assertEquals(activity.getText(R.string.error_settings_incomplete), messageView.getText());
     }
-
+    
     public void testNoProjects() throws Throwable
     {
         sendKeys(KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_R);
@@ -138,59 +142,5 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         {
             return password;
         }
-    }
-
-    private static class FakePulse implements IPulse
-    {
-        private Semaphore getAllProjectStatusesFlag = new Semaphore(0);
-        private String[]  projectNames              = new String[0];
-
-        @Override
-        public List<ProjectStatus> getAllProjectStatuses()
-        {
-            try
-            {
-                getAllProjectStatusesFlag.acquire();
-                return getProjectStatuses(projectNames);
-            }
-            catch (InterruptedException e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private List<ProjectStatus> getProjectStatuses(String[] names)
-        {
-            List<ProjectStatus> statuses = new LinkedList<ProjectStatus>();
-            for (String name: names)
-            {
-                statuses.add(new ProjectStatus(name, new BuildResult(1, ResultStatus.SUCCESS, 100), null));
-            }
-            
-            return statuses;
-        }
-
-        @Override
-        public List<ProjectStatus> getMyProjectStatuses()
-        {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        public void releaseGetAllProjectStatuses()
-        {
-            getAllProjectStatusesFlag.release();
-        }
-
-        public void setProjectNames(String... projectNames)
-        {
-            this.projectNames = projectNames;
-        }
-
-        @Override
-        public void close() throws IOException
-        {
-        }
-
     }
 }
