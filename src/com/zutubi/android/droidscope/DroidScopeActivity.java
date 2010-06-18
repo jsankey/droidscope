@@ -18,15 +18,18 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.zutubi.android.libpulse.IPulse;
 import com.zutubi.android.libpulse.ProjectStatus;
@@ -41,7 +44,8 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
 {
     public static final String PROPERTY_TEST_MODE = "droidscope.test";
     
-    private static final int ID_CONNECTION_DIALOG = 1;
+    private static final int ID_CONTEXT_TRIGGER = 1;
+    private static final int ID_DIALOG_CONNECTION = 1;
     
     private ISettings                   settings;
     private ArrayAdapter<ProjectStatus> adapter;
@@ -67,6 +71,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         ListView list = (ListView) findViewById(R.id.list);
         adapter = new ArrayAdapter<ProjectStatus>(this, R.layout.project);
         list.setAdapter(adapter);        
+        registerForContextMenu(list);
     }
     
     @Override
@@ -76,7 +81,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         
         if (settingsIncomplete())
         {
-            showDialog(ID_CONNECTION_DIALOG);
+            showDialog(ID_DIALOG_CONNECTION);
         }
     }
 
@@ -85,7 +90,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     {
         switch (id)
         {
-            case ID_CONNECTION_DIALOG:
+            case ID_DIALOG_CONNECTION:
             {
                 LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
                 View layout = inflater.inflate(R.layout.connection, (ViewGroup) findViewById(R.id.connection_root));
@@ -133,6 +138,29 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         }
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
+    {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(0, ID_CONTEXT_TRIGGER, 0, getText(R.string.context_trigger));
+    }
+    
+    @Override
+    public boolean onContextItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case ID_CONTEXT_TRIGGER:
+                AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+                ProjectStatus status = adapter.getItem(info.position);
+                TriggerTask task = new TriggerTask();
+                task.execute(status.getProjectName());
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -209,6 +237,22 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         settings = new PreferencesSettings(preferences);
     }
 
+    private void showErrorDialog(String message)
+    {
+        visibleDialog.hide();
+        visibleDialog = new AlertDialog.Builder(DroidScopeActivity.this).setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.error).setMessage(message).setPositiveButton(
+                        android.R.string.ok, new OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                visibleDialog = null;
+                            }
+                        }).create();
+        visibleDialog.show();
+    }
+
     public Dialog getVisibleDialog()
     {
         return visibleDialog;
@@ -228,6 +272,36 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     public void setSettings(ISettings settings)
     {
         this.settings = settings;
+    }
+    
+    /**
+     * Triggers a project in the background, so as not to hold up the UI.
+     */
+    private class TriggerTask extends AsyncTask<String, Integer, String>
+    {
+        @Override
+        protected String doInBackground(String... params)
+        {
+            try
+            {
+                pulse.triggerBuild(params[0]);
+            }
+            catch (Exception e)
+            {
+                return e.getMessage();
+            }
+            
+            return null;
+        }
+        
+        @Override
+        protected void onPostExecute(String errorMessage)
+        {
+            if (errorMessage != null)
+            {
+                showErrorDialog("Unable to trigger project: " + errorMessage);
+            }
+        }
     }
 
     /**
@@ -276,18 +350,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
             }
             else if (result.error != null)
             {
-                visibleDialog.hide();
-                visibleDialog = new AlertDialog.Builder(DroidScopeActivity.this).setIcon(android.R.drawable.ic_dialog_alert)
-                        .setTitle(R.string.error).setMessage(result.error.getMessage()).setPositiveButton(
-                                android.R.string.ok, new OnClickListener()
-                                {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which)
-                                    {
-                                        visibleDialog = null;
-                                    }
-                                }).create();
-                visibleDialog.show();
+                showErrorDialog(result.error.getMessage());
             }
             else
             {

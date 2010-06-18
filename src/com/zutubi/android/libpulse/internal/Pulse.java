@@ -93,6 +93,19 @@ public class Pulse implements IPulse
         return new ProjectStatus(name, latestCompletedBuild, runningBuild);
     }
 
+    @Override
+    public void triggerBuild(String project)
+    {
+        try
+        {
+            client.triggerBuild(project);
+        }
+        catch (XMLRPCException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+    
     private BuildResult convertBuild(Map<String, Object> map)
     {
         return new BuildResult((Integer) map.get("id"), convertStatus((String) map.get("status")), (Integer) map.get("progress"));

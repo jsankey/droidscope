@@ -42,7 +42,7 @@ public class PulseClient implements IPulseClient
     public String[] getMyProjectNames() throws XMLRPCException
     {
         ensureToken();
-        Object[] names = doCall("RemoteApi.getMyProjectNames", token);
+        Object[] names = doCall("getMyProjectNames", token);
         return convertStrings(names);
     }
 
@@ -53,7 +53,7 @@ public class PulseClient implements IPulseClient
     public String[] getAllProjectNames() throws XMLRPCException
     {
         ensureToken();
-        Object[] names = doCall("RemoteApi.getAllProjectNames", token);
+        Object[] names = doCall("getAllProjectNames", token);
         return convertStrings(names);
     }
 
@@ -72,13 +72,20 @@ public class PulseClient implements IPulseClient
     public Object[] getLatestBuildsForProject(String projectName, boolean completedOnly, int maxResults) throws XMLRPCException
     {
         ensureToken();
-        return doCall("RemoteApi.getLatestBuildsForProject", token, projectName, completedOnly, maxResults);
+        return doCall("getLatestBuildsForProject", token, projectName, completedOnly, maxResults);
     }
 
+    @Override
+    public void triggerBuild(String projectName) throws XMLRPCException
+    {
+        ensureToken();
+        doCall("triggerBuild", token, projectName);
+    }
+    
     @SuppressWarnings("unchecked")
     private <T> T doCall(String methodName, Object... args) throws XMLRPCException
     {
-        Object result = client.callEx(methodName, args);
+        Object result = client.callEx("RemoteApi." + methodName, args);
         return (T) result;
     }
 

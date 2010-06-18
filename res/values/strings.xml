@@ -9,6 +9,8 @@
     <string name="connection">Set Up Connection</string>    
     <string name="settings">Settings</string>    
 
+    <string name="context_trigger">Trigger</string>    
+
     <string name="settings_pulse_server">Pulse Server</string>
     <string name="settings_pulse_url">Pulse URL</string>
     <string name="settings_username">User Name</string>

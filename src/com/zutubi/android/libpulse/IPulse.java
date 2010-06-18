@@ -22,4 +22,12 @@ public interface IPulse extends Closeable
      * @return a list of statuses, one for each project
      */
     List<ProjectStatus> getMyProjectStatuses();
+    
+    /**
+     * Triggers a new build of the given project.  The user must have trigger
+     * permission for this to work.
+     * 
+     * @param project name of the project to trigger
+     */
+    void triggerBuild(String project);
 }

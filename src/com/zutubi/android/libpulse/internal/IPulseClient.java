@@ -39,4 +39,12 @@ public interface IPulseClient extends Closeable
      * @throws XMLRPCException on error
      */
     Object[] getLatestBuildsForProject(String projectName, boolean completedOnly, int maxResults) throws XMLRPCException;
+    
+    /**
+     * Triggers a new build of the give project.  Requires trigger permission.
+     * 
+     * @param projectName name of the project to trigger
+     * @throws XMLRPCException on error
+     */
+    void triggerBuild(String projectName) throws XMLRPCException;
 }
