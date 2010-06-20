@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.zutubi.android.droidscope.test;
 
 import java.io.IOException;
@@ -13,6 +10,9 @@ import com.zutubi.android.libpulse.IPulse;
 import com.zutubi.android.libpulse.ProjectStatus;
 import com.zutubi.android.libpulse.ResultStatus;
 
+/**
+ * A testing implementation of the {@link IPulse} interface.
+ */
 class FakePulse implements IPulse
 {
     private Semaphore getAllProjectStatusesFlag = new Semaphore(0);
@@ -49,6 +49,11 @@ class FakePulse implements IPulse
         return null;
     }
 
+    @Override
+    public void triggerBuild(String project)
+    {
+    }
+
     public void releaseGetAllProjectStatuses()
     {
         getAllProjectStatusesFlag.release();
@@ -63,5 +68,4 @@ class FakePulse implements IPulse
     public void close() throws IOException
     {
     }
-
 }
