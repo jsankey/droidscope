@@ -26,7 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -43,42 +42,42 @@ import com.zutubi.android.libpulse.internal.PulseClient;
 public class DroidScopeActivity extends Activity implements OnSharedPreferenceChangeListener
 {
     public static final String PROPERTY_TEST_MODE = "droidscope.test";
-    
+
     private static final int ID_CONTEXT_TRIGGER = 1;
     private static final int ID_DIALOG_CONNECTION = 1;
-    
-    private ISettings                   settings;
-    private ArrayAdapter<ProjectStatus> adapter;
-    private IPulse                      pulse;
-    private Dialog                      visibleDialog;
+
+    private ISettings settings;
+    private ProjectStatusAdapter adapter;
+    private IPulse pulse;
+    private Dialog visibleDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-    
+
         if (Boolean.getBoolean(PROPERTY_TEST_MODE))
         {
             KeyguardManager keyGuardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
             KeyguardLock lock = keyGuardManager.newKeyguardLock(getClass().getName());
             lock.disableKeyguard();
         }
-        
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(this);
         settings = new PreferencesSettings(preferences);
         setContentView(R.layout.main);
         ListView list = (ListView) findViewById(R.id.list);
-        adapter = new ArrayAdapter<ProjectStatus>(this, R.layout.project);
-        list.setAdapter(adapter);        
+        adapter = new ProjectStatusAdapter(this);
+        list.setAdapter(adapter);
         registerForContextMenu(list);
     }
-    
+
     @Override
     protected void onResume()
     {
         super.onResume();
-        
+
         if (settingsIncomplete())
         {
             showDialog(ID_DIALOG_CONNECTION);
@@ -104,16 +103,19 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
                     {
                         AlertDialog alertDialog = (AlertDialog) dialog;
                         CharSequence url = ((TextView) alertDialog.findViewById(R.id.connection_pulse_url)).getText();
-                        CharSequence username = ((TextView) alertDialog.findViewById(R.id.connection_username)).getText();
-                        CharSequence password = ((TextView) alertDialog.findViewById(R.id.connection_password)).getText();
+                        CharSequence username = ((TextView) alertDialog.findViewById(R.id.connection_username))
+                                        .getText();
+                        CharSequence password = ((TextView) alertDialog.findViewById(R.id.connection_password))
+                                        .getText();
 
-                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(DroidScopeActivity.this);
+                        SharedPreferences preferences = PreferenceManager
+                                        .getDefaultSharedPreferences(DroidScopeActivity.this);
                         Editor editor = preferences.edit();
                         editor.putString(PreferencesSettings.PROPERTY_URL, url.toString());
                         editor.putString(PreferencesSettings.PROPERTY_USERNAME, username.toString());
                         editor.putString(PreferencesSettings.PROPERTY_PASSWORD, password.toString());
                         editor.commit();
-                        
+
                         hideDialog();
                     }
                 });
@@ -126,7 +128,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
                         hideDialog();
                     }
                 });
-                
+
                 AlertDialog dialog = builder.create();
                 visibleDialog = dialog;
                 return dialog;
@@ -144,7 +146,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add(0, ID_CONTEXT_TRIGGER, 0, getText(R.string.context_trigger));
     }
-    
+
     @Override
     public boolean onContextItemSelected(MenuItem item)
     {
@@ -160,7 +162,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
                 return super.onContextItemSelected(item);
         }
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -196,15 +198,15 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         if (settingsIncomplete())
         {
             visibleDialog = new AlertDialog.Builder(this).setTitle(R.string.error).setMessage(
-                    getText(R.string.error_settings_incomplete)).setPositiveButton(android.R.string.ok,
-                    new OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
-                        {
-                            visibleDialog = null;
-                        }
-                    }).create();
+                            getText(R.string.error_settings_incomplete)).setPositiveButton(android.R.string.ok,
+                            new OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which)
+                                {
+                                    visibleDialog = null;
+                                }
+                            }).create();
             visibleDialog.show();
             return false;
         }
@@ -241,15 +243,15 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     {
         visibleDialog.hide();
         visibleDialog = new AlertDialog.Builder(DroidScopeActivity.this).setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle(R.string.error).setMessage(message).setPositiveButton(
-                        android.R.string.ok, new OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which)
-                            {
-                                visibleDialog = null;
-                            }
-                        }).create();
+                        .setTitle(R.string.error).setMessage(message).setPositiveButton(android.R.string.ok,
+                                        new OnClickListener()
+                                        {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which)
+                                            {
+                                                visibleDialog = null;
+                                            }
+                                        }).create();
         visibleDialog.show();
     }
 
@@ -273,7 +275,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     {
         this.settings = settings;
     }
-    
+
     /**
      * Triggers a project in the background, so as not to hold up the UI.
      */
@@ -290,10 +292,10 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
             {
                 return e.getMessage();
             }
-            
+
             return null;
         }
-        
+
         @Override
         protected void onPostExecute(String errorMessage)
         {
@@ -362,7 +364,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     private static class RefreshResult
     {
         private List<ProjectStatus> statuses;
-        private Exception           error;
+        private Exception error;
 
         public RefreshResult(List<ProjectStatus> statuses)
         {
