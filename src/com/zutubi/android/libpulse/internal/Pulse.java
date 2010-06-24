@@ -108,7 +108,68 @@ public class Pulse implements IPulse
     
     private BuildResult convertBuild(Map<String, Object> map)
     {
-        return new BuildResult((Integer) map.get("id"), convertStatus((String) map.get("status")), (Integer) map.get("progress"));
+        return new BuildResult(
+                (Integer) map.get("id"),
+                convertStatus((String) map.get("status")),
+                (String) map.get("revision"),
+                getTests(map),
+                getLong(map, "startTimeMillis"),
+                getLong(map, "endTimeMillis"),
+                (Integer) map.get("progress"));
+    }
+
+    private String getTests(Map<String, Object> map)
+    {
+        Object value = map.get("tests");
+        if (value == null)
+        {
+            return null;
+        }
+        else
+        {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> testSummary = (Map<String, Object>) value;
+            int total = (Integer) testSummary.get("total");
+            if (total == 0)
+            {
+                return "none";
+            }
+            else
+            {
+                int passed = (Integer) testSummary.get("passed");
+                int skipped = (Integer) testSummary.get("skipped");
+                String message;
+                
+                if (passed == total - skipped)
+                {
+                    message = String.format("all %d passed", passed);
+                }
+                else
+                {
+                    message = String.format("%d of %d broken", total - skipped - passed, total - skipped);
+                }
+                
+                if (skipped > 0)
+                {
+                    message += String.format(" (%d skipped)", skipped);
+                }
+            
+                return message;
+            }
+        }
+    }
+
+    private long getLong(Map<String, Object> map, String key)
+    {
+        String value = (String) map.get(key);
+        if (value == null)
+        {
+            return -1;
+        }
+        else
+        {
+            return Long.parseLong(value);
+        }
     }
 
     private ResultStatus convertStatus(String s)

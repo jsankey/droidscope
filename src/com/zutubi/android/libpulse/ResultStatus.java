@@ -50,4 +50,9 @@ public enum ResultStatus
     {
         return complete;
     }
+
+    public String pretty()
+    {
+        return name().toLowerCase().replace('_', ' ');
+    }
 }

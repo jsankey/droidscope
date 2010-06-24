@@ -37,7 +37,7 @@ class FakePulse implements IPulse
         List<ProjectStatus> statuses = new LinkedList<ProjectStatus>();
         for (String name: names)
         {
-            statuses.add(new ProjectStatus(name, new BuildResult(1, ResultStatus.SUCCESS, 100), null));
+            statuses.add(new ProjectStatus(name, new BuildResult(1, ResultStatus.SUCCESS, "rev", "tests", 0, 0, 100), null));
         }
         
         return statuses;

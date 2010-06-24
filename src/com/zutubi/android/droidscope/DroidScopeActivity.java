@@ -26,9 +26,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.zutubi.android.libpulse.IPulse;
 import com.zutubi.android.libpulse.ProjectStatus;
@@ -39,7 +41,7 @@ import com.zutubi.android.libpulse.internal.PulseClient;
  * The main activity for DroidScope: shows a list of projects with their health
  * on refresh.
  */
-public class DroidScopeActivity extends Activity implements OnSharedPreferenceChangeListener
+public class DroidScopeActivity extends Activity implements OnSharedPreferenceChangeListener, OnItemClickListener
 {
     public static final String PROPERTY_TEST_MODE = "droidscope.test";
 
@@ -71,6 +73,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         adapter = new ProjectStatusAdapter(this);
         list.setAdapter(adapter);
         registerForContextMenu(list);
+        list.setOnItemClickListener(this);
     }
 
     @Override
@@ -85,6 +88,15 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     }
 
     @Override
+    public void onItemClick(AdapterView<?> list, View view, int position, long id)
+    {
+        ProjectStatusView statusView = (ProjectStatusView) view;
+        Intent intent = new Intent(this, ProjectActivity.class);
+        intent.putExtra(ProjectActivity.PARAM_PROJECT_STATUS, statusView.getStatus().getProjectName());
+        startActivity(intent);
+    }
+
+    @Override
     protected Dialog onCreateDialog(int id)
     {
         switch (id)
@@ -93,6 +105,12 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
             {
                 LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
                 View layout = inflater.inflate(R.layout.connection, (ViewGroup) findViewById(R.id.connection_root));
+                
+                final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(DroidScopeActivity.this);
+                populateField(preferences, layout, PreferencesSettings.PROPERTY_URL, R.id.connection_pulse_url);
+                populateField(preferences, layout, PreferencesSettings.PROPERTY_USERNAME, R.id.connection_username);
+                populateField(preferences, layout, PreferencesSettings.PROPERTY_PASSWORD, R.id.connection_password);
+                
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle(R.string.connection);
                 builder.setView(layout);
@@ -108,8 +126,6 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
                         CharSequence password = ((TextView) alertDialog.findViewById(R.id.connection_password))
                                         .getText();
 
-                        SharedPreferences preferences = PreferenceManager
-                                        .getDefaultSharedPreferences(DroidScopeActivity.this);
                         Editor editor = preferences.edit();
                         editor.putString(PreferencesSettings.PROPERTY_URL, url.toString());
                         editor.putString(PreferencesSettings.PROPERTY_USERNAME, username.toString());
@@ -137,6 +153,15 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
             {
                 return null;
             }
+        }
+    }
+
+    private void populateField(final SharedPreferences preferences, View layout, String property, int viewId)
+    {
+        String value = preferences.getString(property, null);
+        if (value != null)
+        {
+            ((TextView) layout.findViewById(viewId)).setText(value);
         }
     }
 
@@ -328,6 +353,8 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
             try
             {
                 List<ProjectStatus> result = pulse.getAllProjectStatuses();
+                ProjectStatusCache.clear();
+                ProjectStatusCache.putAll(result);
                 return new RefreshResult(result);
             }
             catch (RuntimeException e)

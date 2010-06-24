@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.zutubi.android.droidscope.DroidScopeActivity;
 import com.zutubi.android.droidscope.ISettings;
+import com.zutubi.android.droidscope.ProjectStatusView;
 import com.zutubi.android.droidscope.R;
 
 public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<DroidScopeActivity>
@@ -85,8 +86,8 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         waitForDialogToDisappear();
         ArrayList<View> listItems = list.getTouchables();
         assertEquals(2, listItems.size());
-        assertEquals("p1: ok", ((TextView) listItems.get(0)).getText());
-        assertEquals("p2: ok", ((TextView) listItems.get(1)).getText());
+        assertEquals("p1: ok", ((ProjectStatusView) listItems.get(0)).getStatus().toString());
+        assertEquals("p2: ok", ((ProjectStatusView) listItems.get(1)).getStatus().toString());
     }
 
     private void waitForDialogToDisappear()

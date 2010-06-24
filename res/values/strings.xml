@@ -16,6 +16,17 @@
     <string name="settings_username">User Name</string>
     <string name="settings_password">Password</string>
     
+    <string name="project_current_build">build in progress</string>
+    <string name="project_completed_build">latest completed build</string>
+    <string name="project_never_built">this project has never been built</string>
+    <string name="build_id">id</string>
+    <string name="build_status">status</string>
+    <string name="build_revision">revision</string>
+    <string name="build_tests">tests</string>
+    <string name="build_when">when</string>
+    <string name="build_elapsed">elapsed</string>
+    <string name="build_progress">progress</string>
+    
     <string name="error">Error</string>    
     <string name="error_settings_incomplete">Your settings are incomplete.</string>
 </resources>

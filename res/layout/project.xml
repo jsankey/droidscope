@@ -1,6 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="wrap_content"
-  android:layout_height="wrap_content">
-</TextView>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/project_container">
+    <LinearLayout
+      android:orientation="horizontal"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:gravity="center">
+        <ImageView
+          android:id="@+id/project_health_icon"
+          android:layout_width="wrap_content"
+          android:layout_height="fill_parent">
+        </ImageView>
+	    <TextView
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:text="project name"
+	      android:textSize="18dip"
+	      android:padding="4dip"
+	      android:id="@+id/project_name">
+	    </TextView>
+    </LinearLayout>
+    <TableLayout
+      android:id="@+id/project_current_build_table"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:background="@drawable/panel_background"
+      android:visibility="gone"
+      android:layout_margin="0dip">
+        <TextView
+          android:text="@string/project_current_build"
+          android:textStyle="bold"
+          android:textColor="#000000"
+          android:background="#aab9c8"
+          android:padding="4dip">
+        </TextView>
+    </TableLayout>
+    <TableLayout
+      android:id="@+id/project_completed_build_table"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:background="@drawable/panel_background"
+      android:visibility="gone">
+        <TextView
+          android:text="@string/project_completed_build"
+          android:textStyle="bold"
+          android:textColor="#000000"
+          android:background="#aab9c8"
+          android:padding="4dip">
+        </TextView>
+    </TableLayout>
+</LinearLayout>
