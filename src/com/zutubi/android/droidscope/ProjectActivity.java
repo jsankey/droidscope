@@ -21,6 +21,10 @@ public class ProjectActivity extends Activity
 {
     public static final String PARAM_PROJECT_STATUS = "project.status";
     
+    private String projectName;
+    private LinearLayout containerLayout;
+    private ImageView healthImage;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -31,40 +35,61 @@ public class ProjectActivity extends Activity
         Bundle extras = getIntent().getExtras();
         if (extras != null)
         {
-            String projectName = extras.getString(PARAM_PROJECT_STATUS);
-            ProjectStatus status = ProjectStatusCache.findByProjectName(projectName);
+            projectName = extras.getString(PARAM_PROJECT_STATUS);
+            showProject();
+        }
+    }
 
-            ImageView healthImage = (ImageView) findViewById(R.id.project_health_icon);
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        showProject();
+    }
+    
+    private void showProject()
+    {
+        containerLayout = (LinearLayout) findViewById(R.id.project_container);
+        healthImage = (ImageView) findViewById(R.id.project_health_icon);
+
+        ProjectStatus status = ProjectStatusCache.findByProjectName(projectName);
+        if (status != null)
+        {
             healthImage.setImageResource(UiUtils.healthToResourceId(status.getHealth()));
             healthImage.setAnimation(UiUtils.getProjectAnimation(status));
             setTextById(R.id.project_name, status.getProjectName());
-            
             BuildResult currentBuild = showBuildIfPresent(status.getRunningBuild(), R.id.project_current_build_table);
-            BuildResult completedBuild = showBuildIfPresent(status.getLatestCompletedBuild(), R.id.project_completed_build_table);
-            
+            BuildResult completedBuild = showBuildIfPresent(status.getLatestCompletedBuild(),
+                    R.id.project_completed_build_table);
             if (currentBuild == null && completedBuild == null)
             {
-                LinearLayout containerLayout = (LinearLayout) findViewById(R.id.project_container);
                 TextView textView = new TextView(this);
                 textView.setText(R.string.project_never_built);
                 containerLayout.addView(textView);
             }
         }
+        
+        containerLayout.invalidate();
     }
 
     private BuildResult showBuildIfPresent(BuildResult build, int tableId)
     {
-        if (build != null)
+        TableLayout buildTable = (TableLayout) findViewById(tableId);
+        if (build == null)
         {
-            TableLayout currentBuildTable = (TableLayout) findViewById(tableId);
-            addBuildDetailsToTable(build, currentBuildTable);
-            currentBuildTable.setVisibility(View.VISIBLE);
+            buildTable.setVisibility(View.GONE);
+        }
+        else
+        {
+            addBuildDetailsToTable(build, buildTable);
+            buildTable.setVisibility(View.VISIBLE);
         }
         return build;
     }
 
     private void addBuildDetailsToTable(BuildResult build, TableLayout table)
     {
+        table.removeViews(1, table.getChildCount() - 1);
         table.addView(createRow(R.string.build_id, build.getNumber()));
         table.addView(createRow(R.string.build_status, build.getStatus().pretty()));
         if (build.getRevision() != null)

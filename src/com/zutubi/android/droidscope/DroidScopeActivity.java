@@ -77,6 +77,13 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     }
 
     @Override
+    protected void onStart()
+    {
+        super.onStart();
+        updateList();
+    }
+    
+    @Override
     protected void onResume()
     {
         super.onResume();
@@ -85,6 +92,17 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         {
             showDialog(ID_DIALOG_CONNECTION);
         }
+    }
+
+    private void updateList()
+    {
+        adapter.clear();
+        for (ProjectStatus state : ProjectStatusCache.getAll())
+        {
+            adapter.add(state);
+        }
+
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -355,7 +373,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
                 List<ProjectStatus> result = pulse.getAllProjectStatuses();
                 ProjectStatusCache.clear();
                 ProjectStatusCache.putAll(result);
-                return new RefreshResult(result);
+                return new RefreshResult();
             }
             catch (RuntimeException e)
             {
@@ -366,15 +384,9 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         @Override
         protected void onPostExecute(RefreshResult result)
         {
-            adapter.clear();
-            if (result.statuses != null)
+            if (result.isSuccessful())
             {
-                for (ProjectStatus state : result.statuses)
-                {
-                    adapter.add(state);
-                }
-
-                adapter.notifyDataSetChanged();
+                updateList();
                 hideDialog();
             }
             else if (result.error != null)
@@ -390,17 +402,23 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
 
     private static class RefreshResult
     {
-        private List<ProjectStatus> statuses;
+        private boolean successful;
         private Exception error;
 
-        public RefreshResult(List<ProjectStatus> statuses)
+        public RefreshResult()
         {
-            this.statuses = statuses;
+            this.successful = true;
         }
 
         public RefreshResult(Exception error)
         {
+            this.successful = false;
             this.error = error;
+        }
+        
+        public boolean isSuccessful()
+        {
+            return successful;
         }
     }
 }
