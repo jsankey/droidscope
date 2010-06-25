@@ -5,13 +5,13 @@
   android:layout_width="fill_parent"
   android:layout_height="fill_parent"
   android:orientation="vertical"
-  android:padding="4px">
+  android:padding="4dip">
 	<TextView
 	  android:text="@string/settings_pulse_url"
       android:id="@+id/connection_pulse_url_label"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:paddingBottom="4px">
+      android:paddingBottom="4dip">
     </TextView>
 	<EditText
 	  android:id="@+id/connection_pulse_url"
@@ -24,8 +24,8 @@
       android:id="@+id/connection_username_label"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:paddingTop="6px"
-      android:paddingBottom="4px">
+      android:paddingTop="6dip"
+      android:paddingBottom="4dip">
     </TextView>
 	<EditText
 	  android:id="@+id/connection_username"
@@ -38,8 +38,8 @@
       android:id="@+id/connection_password_label"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:paddingTop="6px"
-      android:paddingBottom="4px">
+      android:paddingTop="6dip"
+      android:paddingBottom="4dip">
     </TextView>
 	<EditText
 	  android:id="@+id/connection_password"
@@ -48,4 +48,14 @@
 	  android:layout_height="wrap_content"
 	  android:singleLine="true">
 	</EditText>
+	<LinearLayout
+	  android:layout_height="fill_parent"
+	  android:layout_width="fill_parent"
+	  android:gravity="center|bottom">
+	    <Button
+	      android:id="@+id/connection_ok"
+	      android:text="@android:string/ok"
+	      android:layout_width="150dip"
+	      android:layout_height="wrap_content"/>
+	</LinearLayout>
 </LinearLayout>

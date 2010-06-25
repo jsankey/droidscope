@@ -2,23 +2,22 @@ package com.zutubi.android.droidscope.test;
 
 import java.util.ArrayList;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.TextView;
 
 import com.zutubi.android.droidscope.DroidScopeActivity;
-import com.zutubi.android.droidscope.ISettings;
 import com.zutubi.android.droidscope.ProjectStatusView;
 import com.zutubi.android.droidscope.R;
+import com.zutubi.android.droidscope.SettingsHolder;
 
 public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<DroidScopeActivity>
 {
     private DroidScopeActivity activity;
     private View               list;
     private FakePulse          pulse;
+    private FakeSettings       settings;
 
     public DroidScopeActivityTest()
     {
@@ -30,39 +29,17 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
     protected void setUp() throws Exception
     {
         super.setUp();
-        
+
+        settings = new FakeSettings("http://localhost", "admin", "admin");
+        SettingsHolder.setSettings(settings);
+
         setActivityInitialTouchMode(false);
         activity = getActivity();
-        activity.setSettings(new FakeSettings("http://localhost", "admin", "admin"));
-        activity.runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if (activity.getVisibleDialog() != null)
-                {
-                    activity.hideDialog();
-                }
-            }
-        });
-
         getInstrumentation().waitForIdleSync();
 
         list = activity.findViewById(R.id.list);
         pulse = new FakePulse();
         activity.setPulse(pulse);
-    }
-
-    public void testIncompleteSettings() throws Throwable
-    {
-        activity.setSettings(new FakeSettings("", "admin", "admin"));
-        sendKeys(KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_R);
-        getInstrumentation().waitForIdleSync();
-        Dialog errorDialog = activity.getVisibleDialog();
-        assertNotNull(errorDialog);
-        TextView messageView = (TextView) errorDialog.getWindow().findViewById(android.R.id.message);
-        assertNotNull(messageView);
-        assertEquals(activity.getText(R.string.error_settings_incomplete), messageView.getText());
     }
     
     public void testNoProjects() throws Throwable
@@ -111,37 +88,5 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         }
 
         fail("Timed out waiting for dialog to disappear");
-    }
-
-    private static class FakeSettings implements ISettings
-    {
-        String url;
-        String username;
-        String password;
-
-        public FakeSettings(String url, String username, String password)
-        {
-            this.url = url;
-            this.username = username;
-            this.password = password;
-        }
-
-        @Override
-        public String getURL()
-        {
-            return url;
-        }
-
-        @Override
-        public String getUsername()
-        {
-            return username;
-        }
-
-        @Override
-        public String getPassword()
-        {
-            return password;
-        }
     }
 }

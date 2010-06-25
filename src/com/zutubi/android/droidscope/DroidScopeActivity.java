@@ -13,22 +13,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
-import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -46,8 +42,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     public static final String PROPERTY_TEST_MODE = "droidscope.test";
 
     private static final int ID_CONTEXT_TRIGGER = 1;
-    private static final int ID_DIALOG_CONNECTION = 1;
-
+ 
     private ISettings settings;
     private ProjectStatusAdapter adapter;
     private IPulse pulse;
@@ -65,9 +60,14 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
             lock.disableKeyguard();
         }
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferences.registerOnSharedPreferenceChangeListener(this);
-        settings = new PreferencesSettings(preferences);
+        settings = SettingsHolder.getSettings();
+        if (settings == null)
+        {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            preferences.registerOnSharedPreferenceChangeListener(this);
+            settings = new PreferencesSettings(preferences);
+        }
+        
         setContentView(R.layout.main);
         ListView list = (ListView) findViewById(R.id.list);
         adapter = new ProjectStatusAdapter(this);
@@ -90,7 +90,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
 
         if (settingsIncomplete())
         {
-            showDialog(ID_DIALOG_CONNECTION);
+            startActivity(new Intent(this, SetupConnectionActivity.class));
         }
     }
 
@@ -112,75 +112,6 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         Intent intent = new Intent(this, ProjectActivity.class);
         intent.putExtra(ProjectActivity.PARAM_PROJECT_STATUS, statusView.getStatus().getProjectName());
         startActivity(intent);
-    }
-
-    @Override
-    protected Dialog onCreateDialog(int id)
-    {
-        switch (id)
-        {
-            case ID_DIALOG_CONNECTION:
-            {
-                LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-                View layout = inflater.inflate(R.layout.connection, (ViewGroup) findViewById(R.id.connection_root));
-                
-                final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(DroidScopeActivity.this);
-                populateField(preferences, layout, PreferencesSettings.PROPERTY_URL, R.id.connection_pulse_url);
-                populateField(preferences, layout, PreferencesSettings.PROPERTY_USERNAME, R.id.connection_username);
-                populateField(preferences, layout, PreferencesSettings.PROPERTY_PASSWORD, R.id.connection_password);
-                
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.connection);
-                builder.setView(layout);
-                builder.setPositiveButton(android.R.string.ok, new OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        AlertDialog alertDialog = (AlertDialog) dialog;
-                        CharSequence url = ((TextView) alertDialog.findViewById(R.id.connection_pulse_url)).getText();
-                        CharSequence username = ((TextView) alertDialog.findViewById(R.id.connection_username))
-                                        .getText();
-                        CharSequence password = ((TextView) alertDialog.findViewById(R.id.connection_password))
-                                        .getText();
-
-                        Editor editor = preferences.edit();
-                        editor.putString(PreferencesSettings.PROPERTY_URL, url.toString());
-                        editor.putString(PreferencesSettings.PROPERTY_USERNAME, username.toString());
-                        editor.putString(PreferencesSettings.PROPERTY_PASSWORD, password.toString());
-                        editor.commit();
-
-                        hideDialog();
-                    }
-                });
-
-                builder.setNegativeButton(android.R.string.cancel, new OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        hideDialog();
-                    }
-                });
-
-                AlertDialog dialog = builder.create();
-                visibleDialog = dialog;
-                return dialog;
-            }
-            default:
-            {
-                return null;
-            }
-        }
-    }
-
-    private void populateField(final SharedPreferences preferences, View layout, String property, int viewId)
-    {
-        String value = preferences.getString(property, null);
-        if (value != null)
-        {
-            ((TextView) layout.findViewById(viewId)).setText(value);
-        }
     }
 
     @Override
@@ -240,17 +171,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     {
         if (settingsIncomplete())
         {
-            visibleDialog = new AlertDialog.Builder(this).setTitle(R.string.error).setMessage(
-                            getText(R.string.error_settings_incomplete)).setPositiveButton(android.R.string.ok,
-                            new OnClickListener()
-                            {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which)
-                                {
-                                    visibleDialog = null;
-                                }
-                            }).create();
-            visibleDialog.show();
+            startActivity(new Intent(this, SetupConnectionActivity.class));
             return false;
         }
         else

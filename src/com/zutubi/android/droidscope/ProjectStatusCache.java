@@ -1,7 +1,7 @@
 package com.zutubi.android.droidscope;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -13,7 +13,7 @@ import com.zutubi.android.libpulse.ProjectStatus;
  */
 public class ProjectStatusCache
 {
-    private static Map<String, ProjectStatus> nameToStatusMap = new HashMap<String, ProjectStatus>();
+    private static Map<String, ProjectStatus> nameToStatusMap = new LinkedHashMap<String, ProjectStatus>();
 
     public static Collection<ProjectStatus> getAll()
     {
