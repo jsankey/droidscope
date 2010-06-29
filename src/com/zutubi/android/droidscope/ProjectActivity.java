@@ -19,23 +19,25 @@ import com.zutubi.android.libpulse.ProjectStatus;
  */
 public class ProjectActivity extends Activity
 {
-    public static final String PARAM_PROJECT_STATUS = "project.status";
+    public static final String PARAM_PROJECT_NAME = "project.name";
     
     private String projectName;
     private LinearLayout containerLayout;
     private ImageView healthImage;
+    private ProjectStatusCache projectStatusCache;
     
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         
-        setContentView(R.layout.project);
+        projectStatusCache = DroidScopeApplication.getProjectStatusCache();
         
+        setContentView(R.layout.project);
         Bundle extras = getIntent().getExtras();
         if (extras != null)
         {
-            projectName = extras.getString(PARAM_PROJECT_STATUS);
+            projectName = extras.getString(PARAM_PROJECT_NAME);
             showProject();
         }
     }
@@ -52,7 +54,7 @@ public class ProjectActivity extends Activity
         containerLayout = (LinearLayout) findViewById(R.id.project_container);
         healthImage = (ImageView) findViewById(R.id.project_health_icon);
 
-        ProjectStatus status = ProjectStatusCache.findByProjectName(projectName);
+        ProjectStatus status = projectStatusCache.findByProjectName(projectName);
         if (status != null)
         {
             healthImage.setImageResource(UiUtils.healthToResourceId(status.getHealth()));
@@ -124,5 +126,10 @@ public class ProjectActivity extends Activity
         {
             textView.setText(textValue.toString());
         }
+    }
+    
+    public void setProjectStatusCache(ProjectStatusCache projectStatusCache)
+    {
+        this.projectStatusCache = projectStatusCache;
     }
 }

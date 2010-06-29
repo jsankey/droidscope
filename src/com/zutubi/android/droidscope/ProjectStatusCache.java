@@ -8,29 +8,52 @@ import java.util.Map;
 import com.zutubi.android.libpulse.ProjectStatus;
 
 /**
- * Quick and dirty cache for project statuses.  A temporary measure until they
- * are stored more sensibly.
+ * Simple cache for project statuses.
  */
 public class ProjectStatusCache
 {
-    private static Map<String, ProjectStatus> nameToStatusMap = new LinkedHashMap<String, ProjectStatus>();
+    private Map<String, ProjectStatus> nameToStatusMap = new LinkedHashMap<String, ProjectStatus>();
 
-    public static Collection<ProjectStatus> getAll()
+    /**
+     * Retrieves all the project statuses, in the order they were added to the
+     * cache.
+     * 
+     * @return all project statuses in the cache
+     */
+    public Collection<ProjectStatus> getAll()
     {
         return new LinkedList<ProjectStatus>(nameToStatusMap.values());
     }
     
-    public static ProjectStatus findByProjectName(String projectName)
+    /**
+     * Returns the status of the given project, if it exists.
+     * 
+     * @param projectName name of the project to retrieve the status of
+     * @return status for the named project, or null if it does not exist
+     */
+    public ProjectStatus findByProjectName(String projectName)
     {
         return nameToStatusMap.get(projectName);
     }
     
-    public static <T extends ProjectStatus> void put(T status)
+    /**
+     * Adds the given status to the cache.
+     * 
+     * @param <T>   actual status type
+     * @param status the status instance to add
+     */
+    public <T extends ProjectStatus> void put(T status)
     {
         nameToStatusMap.put(status.getProjectName(), status);
     }
     
-    public static void putAll(Collection<? extends ProjectStatus> statuses)
+    /**
+     * Adds all of the given statuses, in the iteration order of the given
+     * collection, to the cache.
+     * 
+     * @param statuses collection of instances to add
+     */
+    public void putAll(Collection<? extends ProjectStatus> statuses)
     {
         for (ProjectStatus s: statuses)
         {
@@ -38,7 +61,10 @@ public class ProjectStatusCache
         }
     }
     
-    public static void clear()
+    /**
+     * Empties the cache, removing all current status instances.
+     */
+    public void clear()
     {
         nameToStatusMap.clear();
     }

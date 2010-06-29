@@ -10,6 +10,11 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+/**
+ * An activity that allows convenient first-time setup of connection details.
+ * This is also possible via preferences, but not as conveniently as having all
+ * three fields on a single page.
+ */
 public class SetupConnectionActivity extends Activity implements OnClickListener
 {
     @Override

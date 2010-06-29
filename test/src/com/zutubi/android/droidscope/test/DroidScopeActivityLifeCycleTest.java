@@ -6,7 +6,7 @@ import android.app.Instrumentation.ActivityMonitor;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.zutubi.android.droidscope.DroidScopeActivity;
-import com.zutubi.android.droidscope.SettingsHolder;
+import com.zutubi.android.droidscope.DroidScopeApplication;
 import com.zutubi.android.droidscope.SetupConnectionActivity;
 
 public class DroidScopeActivityLifeCycleTest extends ActivityInstrumentationTestCase2<DroidScopeActivity>
@@ -21,11 +21,12 @@ public class DroidScopeActivityLifeCycleTest extends ActivityInstrumentationTest
     
     public void testResumeWithIncompleteSettings()
     {
+        DroidScopeApplication.setSettings(new FakeSettings("", "", ""));
+        
         Instrumentation instrumentation = getInstrumentation();
         ActivityMonitor activityMonitor = new ActivityMonitor(SetupConnectionActivity.class.getName(), null, false);
         instrumentation.addMonitor(activityMonitor);
 
-        SettingsHolder.setSettings(new FakeSettings("", "user", "pass"));
         getActivity();
 
         Activity setupActivity = activityMonitor.waitForActivityWithTimeout(TIMEOUT);

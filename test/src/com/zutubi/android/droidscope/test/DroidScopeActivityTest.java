@@ -8,16 +8,16 @@ import android.view.KeyEvent;
 import android.view.View;
 
 import com.zutubi.android.droidscope.DroidScopeActivity;
+import com.zutubi.android.droidscope.DroidScopeApplication;
+import com.zutubi.android.droidscope.ProjectStatusCache;
 import com.zutubi.android.droidscope.ProjectStatusView;
 import com.zutubi.android.droidscope.R;
-import com.zutubi.android.droidscope.SettingsHolder;
 
 public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<DroidScopeActivity>
 {
     private DroidScopeActivity activity;
     private View               list;
     private FakePulse          pulse;
-    private FakeSettings       settings;
 
     public DroidScopeActivityTest()
     {
@@ -29,17 +29,19 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
     protected void setUp() throws Exception
     {
         super.setUp();
-
-        settings = new FakeSettings("http://localhost", "admin", "admin");
-        SettingsHolder.setSettings(settings);
-
+        
         setActivityInitialTouchMode(false);
+
+        pulse = new FakePulse();
+        
+        DroidScopeApplication.setSettings(new FakeSettings("http://localhost", "admin", "admin"));
+        DroidScopeApplication.setProjectStatusCache(new ProjectStatusCache());
+
+        // Initialises the activity.
         activity = getActivity();
-        getInstrumentation().waitForIdleSync();
+        activity.setPulse(pulse);
 
         list = activity.findViewById(R.id.list);
-        pulse = new FakePulse();
-        activity.setPulse(pulse);
     }
     
     public void testNoProjects() throws Throwable

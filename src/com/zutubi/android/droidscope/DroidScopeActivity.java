@@ -47,6 +47,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     private ProjectStatusAdapter adapter;
     private IPulse pulse;
     private Dialog visibleDialog;
+    private ProjectStatusCache projectStatusCache;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -60,14 +61,12 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
             lock.disableKeyguard();
         }
 
-        settings = SettingsHolder.getSettings();
-        if (settings == null)
-        {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            preferences.registerOnSharedPreferenceChangeListener(this);
-            settings = new PreferencesSettings(preferences);
-        }
-        
+        projectStatusCache = DroidScopeApplication.getProjectStatusCache();
+        settings = DroidScopeApplication.getSettings();
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        preferences.registerOnSharedPreferenceChangeListener(this);
+
         setContentView(R.layout.main);
         ListView list = (ListView) findViewById(R.id.list);
         adapter = new ProjectStatusAdapter(this);
@@ -97,7 +96,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     private void updateList()
     {
         adapter.clear();
-        for (ProjectStatus state : ProjectStatusCache.getAll())
+        for (ProjectStatus state : projectStatusCache.getAll())
         {
             adapter.add(state);
         }
@@ -110,7 +109,7 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
     {
         ProjectStatusView statusView = (ProjectStatusView) view;
         Intent intent = new Intent(this, ProjectActivity.class);
-        intent.putExtra(ProjectActivity.PARAM_PROJECT_STATUS, statusView.getStatus().getProjectName());
+        intent.putExtra(ProjectActivity.PARAM_PROJECT_NAME, statusView.getStatus().getProjectName());
         startActivity(intent);
     }
 
@@ -230,6 +229,11 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
         visibleDialog = null;
     }
 
+    public ProjectStatusCache getProjectStatusCache()
+    {
+        return projectStatusCache;
+    }
+    
     public void setPulse(IPulse pulse)
     {
         this.pulse = pulse;
@@ -292,8 +296,8 @@ public class DroidScopeActivity extends Activity implements OnSharedPreferenceCh
             try
             {
                 List<ProjectStatus> result = pulse.getAllProjectStatuses();
-                ProjectStatusCache.clear();
-                ProjectStatusCache.putAll(result);
+                projectStatusCache.clear();
+                projectStatusCache.putAll(result);
                 return new RefreshResult();
             }
             catch (RuntimeException e)
