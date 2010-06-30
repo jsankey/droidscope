@@ -36,10 +36,10 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         
         DroidScopeApplication.setSettings(new FakeSettings("http://localhost", "admin", "admin"));
         DroidScopeApplication.setProjectStatusCache(new ProjectStatusCache());
+        DroidScopeApplication.setPulse(pulse);
 
         // Initialises the activity.
         activity = getActivity();
-        activity.setPulse(pulse);
 
         list = activity.findViewById(R.id.list);
     }

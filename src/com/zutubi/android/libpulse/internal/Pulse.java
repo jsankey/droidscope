@@ -67,8 +67,21 @@ public class Pulse implements IPulse
         return result;
     }
 
+    @Override
+    public ProjectStatus getProjectStatus(String project)
+    {
+        try
+        {
+            return internalGetProjectStatus(project);
+        }
+        catch (XMLRPCException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    private ProjectStatus getProjectStatus(String name) throws XMLRPCException
+    private ProjectStatus internalGetProjectStatus(String name) throws XMLRPCException
     {
         Object[] builds = client.getLatestBuildsForProject(name, false, 2);
         BuildResult latestCompletedBuild = null;

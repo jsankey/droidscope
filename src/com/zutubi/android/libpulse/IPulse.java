@@ -24,6 +24,14 @@ public interface IPulse extends Closeable
     List<ProjectStatus> getMyProjectStatuses();
     
     /**
+     * Returns the status of a single named project.
+     * 
+     * @param project name of the project to get the status of
+     * @return the status of the given project
+     */
+    ProjectStatus getProjectStatus(String project);
+    
+    /**
      * Triggers a new build of the given project.  The user must have trigger
      * permission for this to work.
      * 

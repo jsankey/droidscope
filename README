@@ -1,0 +1,41 @@
+DroidScope
+==========
+
+Introduction
+------------
+
+DroidScope is a simple Android client for the Pulse Continuous Integration
+Server:
+
+http://zutubi.com/products/pulse/
+
+It provides basic abilities to view the health of your Pulse projects and their
+latest builds.
+
+Using DroidScope
+----------------
+
+The first time you start DroidScope, it will prompt you for details of a Pulse
+server.  Once these details are provided, the main DroidScope view will display
+a list of all projects on the server - with their current health indicated by a
+coloured icon.  Projects that are currently building will have an animated icon.
+
+To view more details for a particular project, simply touch the project's name.
+For further options, use the menus or long-touch a project name.
+
+Caveats
+-------
+
+DroidScope is far from a full-blown Pulse client.  Notable weaknesses include:
+
+  * No notification support.  DroidScope is currently designed as a client,
+    rather than a monitor of a Pulse server.  There is no way, e.g., to be
+    notified of new builds.
+  * No project limit.  If you point the client at a server with hundreds of
+    projects, it will naively try to load information on them all.
+
+Acknowledgements
+----------------
+
+  * DroidScope uses icons from the free sets at http://www.androidicons.com/.
+

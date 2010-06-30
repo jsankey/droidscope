@@ -48,6 +48,12 @@ class FakePulse implements IPulse
     {
         return null;
     }
+    
+    @Override
+    public ProjectStatus getProjectStatus(String project)
+    {
+        return null;
+    }
 
     @Override
     public void triggerBuild(String project)

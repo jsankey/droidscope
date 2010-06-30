@@ -1,9 +1,11 @@
 package com.zutubi.android.droidscope;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,7 +19,7 @@ import com.zutubi.android.libpulse.ProjectStatus;
 /**
  * Displays information about a single project.
  */
-public class ProjectActivity extends Activity
+public class ProjectActivity extends ActivitySupport
 {
     public static final String PARAM_PROJECT_NAME = "project.name";
     
@@ -46,6 +48,42 @@ public class ProjectActivity extends Activity
     protected void onStart()
     {
         super.onStart();
+        showProject();
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.project, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case R.id.refresh:
+            {
+                RefreshTask task = new RefreshTask();
+                task.execute(projectName);
+                break;
+            }
+            case R.id.trigger:
+            {
+                TriggerTask task = new TriggerTask();
+                task.execute(projectName);
+                break;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    protected void postRefresh()
+    {
         showProject();
     }
     
