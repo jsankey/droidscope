@@ -17,6 +17,11 @@
     <string name="settings_pulse_url">Pulse URL</string>
     <string name="settings_username">User Name</string>
     <string name="settings_password">Password</string>
+    <string name="settings_behaviour">Behaviour</string>
+    <string name="settings_refresh_on_resume">Refresh On Display</string>
+    <string name="settings_refresh_on_resume_verbose">Turn on to refresh stale views when they are displayed.</string>
+    <string name="settings_stale_age">Stale Age (Secs)</string>
+    <string name="settings_stale_age_verbose">Age of a view before it is considered stale.</string>
     
     <string name="project_current_build">build in progress</string>
     <string name="project_completed_build">latest completed build</string>

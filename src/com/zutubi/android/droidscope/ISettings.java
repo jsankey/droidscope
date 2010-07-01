@@ -25,4 +25,21 @@ public interface ISettings
      * @return password to use for logging in to Pulse 
      */
     String getPassword();
+    
+    /**
+     * Indicates if views showing active data should refresh when they are
+     * displayed.
+     * 
+     * @return true to automatically refresh data on display of an active view
+     */
+    boolean isRefreshOnResume();
+
+    /**
+     * Returns the maximum age, in seconds, of a view before it is considered
+     * stale.  Used in conjunction with {@link #isRefreshOnResume()}.
+     * 
+     * @return the maximum age, in seconds, of a view before it is considered
+     *         stale
+     */
+    int getStaleAge();
 }

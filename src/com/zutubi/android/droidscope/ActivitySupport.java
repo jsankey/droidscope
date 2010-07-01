@@ -22,6 +22,7 @@ import com.zutubi.android.libpulse.ProjectStatus;
 public abstract class ActivitySupport extends Activity
 {
     protected ProjectStatusCache projectStatusCache;
+    protected ISettings settings;
     protected Dialog visibleDialog;
     protected boolean inProgress = false;
 
@@ -30,12 +31,17 @@ public abstract class ActivitySupport extends Activity
     {
         super.onCreate(savedInstanceState);
         projectStatusCache = DroidScopeApplication.getProjectStatusCache();
+        settings = DroidScopeApplication.getSettings();
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
     }
 
     protected void showErrorDialog(String message)
     {
-        visibleDialog.hide();
+        if (visibleDialog != null)
+        {
+            visibleDialog.hide();
+        }
+        
         visibleDialog = new AlertDialog.Builder(this).setIcon(android.R.drawable.ic_dialog_alert)
                         .setTitle(R.string.error).setMessage(message).setPositiveButton(android.R.string.ok,
                                         new OnClickListener()
@@ -65,6 +71,12 @@ public abstract class ActivitySupport extends Activity
         return inProgress;
     }
 
+    public boolean isStale(long timestamp)
+    {
+        long age = (System.currentTimeMillis() - timestamp) / 1000;
+        return settings.getStaleAge() < age;
+    }
+    
     /**
      * Triggers a project in the background, so as not to hold up the UI.
      */

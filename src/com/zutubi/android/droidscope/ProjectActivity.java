@@ -52,6 +52,20 @@ public class ProjectActivity extends ActivitySupport
     }
     
     @Override
+    protected void onResume()
+    {
+        super.onResume();
+        if (settings.isRefreshOnResume())
+        {
+            ProjectStatus status = projectStatusCache.findByProjectName(projectName);
+            if (status != null && isStale(status.getTimestamp()))
+            {
+                refresh();
+            }
+        }
+    }
+    
+    @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
         MenuInflater inflater = getMenuInflater();
@@ -66,8 +80,7 @@ public class ProjectActivity extends ActivitySupport
         {
             case R.id.refresh:
             {
-                RefreshTask task = new RefreshTask();
-                task.execute(projectName);
+                refresh();
                 break;
             }
             case R.id.trigger:
@@ -79,6 +92,12 @@ public class ProjectActivity extends ActivitySupport
         }
 
         return true;
+    }
+
+    private void refresh()
+    {
+        RefreshTask task = new RefreshTask();
+        task.execute(projectName);
     }
 
     @Override

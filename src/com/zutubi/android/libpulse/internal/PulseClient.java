@@ -83,7 +83,7 @@ public class PulseClient implements IPulseClient
     }
     
     @SuppressWarnings("unchecked")
-    private <T> T doCall(String methodName, Object... args) throws XMLRPCException
+    private synchronized <T> T doCall(String methodName, Object... args) throws XMLRPCException
     {
         Object result = client.callEx("RemoteApi." + methodName, args);
         return (T) result;
@@ -100,7 +100,7 @@ public class PulseClient implements IPulseClient
         }
     }
 
-    private void logoutIfRequired() throws XMLRPCException
+    private synchronized void logoutIfRequired() throws XMLRPCException
     {
         if (token != null)
         {

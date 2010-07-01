@@ -4,17 +4,16 @@ import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 
 import com.zutubi.android.libpulse.ProjectStatus;
 
@@ -28,7 +27,6 @@ public class DroidScopeActivity extends ActivitySupport implements OnItemClickLi
 
     private static final int ID_CONTEXT_TRIGGER = 1;
  
-    private ISettings settings;
     private ProjectStatusAdapter adapter;
 
     @Override
@@ -42,8 +40,6 @@ public class DroidScopeActivity extends ActivitySupport implements OnItemClickLi
             KeyguardLock lock = keyGuardManager.newKeyguardLock(getClass().getName());
             lock.disableKeyguard();
         }
-
-        settings = DroidScopeApplication.getSettings();
 
         setContentView(R.layout.main);
         ListView list = (ListView) findViewById(R.id.list);
@@ -68,6 +64,10 @@ public class DroidScopeActivity extends ActivitySupport implements OnItemClickLi
         if (settingsIncomplete())
         {
             startActivity(new Intent(this, SetupConnectionActivity.class));
+        }
+        else if (settings.isRefreshOnResume() && isStale(projectStatusCache.getOldestTimestamp()))
+        {
+            refresh();
         }
     }
 
@@ -131,8 +131,7 @@ public class DroidScopeActivity extends ActivitySupport implements OnItemClickLi
             case R.id.refresh:
                 if (checkSettings())
                 {
-                    RefreshTask task = new RefreshTask();
-                    task.execute();
+                    refresh();
                 }
                 break;
 
@@ -143,6 +142,12 @@ public class DroidScopeActivity extends ActivitySupport implements OnItemClickLi
         }
 
         return true;
+    }
+
+    private void refresh()
+    {
+        RefreshTask task = new RefreshTask();
+        task.execute();
     }
 
     private boolean checkSettings()

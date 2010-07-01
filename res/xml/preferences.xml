@@ -5,4 +5,8 @@
       <EditTextPreference android:key="username" android:title="@string/settings_username"></EditTextPreference>
       <EditTextPreference android:key="password" android:title="@string/settings_password" android:password="true"></EditTextPreference>
     </PreferenceCategory>
+    <PreferenceCategory android:key="behaviour" android:title="@string/settings_behaviour">
+      <CheckBoxPreference android:key="refreshOnResume" android:defaultValue="true" android:title="@string/settings_refresh_on_resume" android:summary="@string/settings_refresh_on_resume_verbose"></CheckBoxPreference>
+      <EditTextPreference android:key="staleAge" android:dependency="refreshOnResume" android:numeric="integer" android:defaultValue="60" android:title="@string/settings_stale_age" android:summary="@string/settings_stale_age_verbose"></EditTextPreference>
+    </PreferenceCategory>
 </PreferenceScreen>

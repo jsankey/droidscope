@@ -7,10 +7,12 @@ import com.zutubi.android.droidscope.ISettings;
  */
 class FakeSettings implements ISettings
 {
-    String url;
-    String username;
-    String password;
-
+    private String url;
+    private String username;
+    private String password;
+    private boolean refreshOnResume = false;
+    private int staleAge;
+    
     public FakeSettings(String url, String username, String password)
     {
         this.url = url;
@@ -34,5 +36,27 @@ class FakeSettings implements ISettings
     public String getPassword()
     {
         return password;
+    }
+
+    @Override
+    public boolean isRefreshOnResume()
+    {
+        return refreshOnResume;
+    }
+    
+    public void setRefreshOnResume(boolean refreshOnResume)
+    {
+        this.refreshOnResume = refreshOnResume;
+    }
+
+    @Override
+    public int getStaleAge()
+    {
+        return staleAge;
+    }
+    
+    public void setStaleAge(int staleAge)
+    {
+        this.staleAge = staleAge;
     }
 }

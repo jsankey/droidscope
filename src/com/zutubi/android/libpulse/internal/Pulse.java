@@ -60,9 +60,10 @@ public class Pulse implements IPulse
     private List<ProjectStatus> getProjectStatuses(String[] projectNames) throws XMLRPCException
     {
         List<ProjectStatus> result = new LinkedList<ProjectStatus>();
+        long timestamp = System.currentTimeMillis();
         for (String name: projectNames)
         {
-            result.add(getProjectStatus(name));
+            result.add(internalGetProjectStatus(name, timestamp));
         }
         return result;
     }
@@ -72,7 +73,7 @@ public class Pulse implements IPulse
     {
         try
         {
-            return internalGetProjectStatus(project);
+            return internalGetProjectStatus(project, System.currentTimeMillis());
         }
         catch (XMLRPCException e)
         {
@@ -81,7 +82,7 @@ public class Pulse implements IPulse
     }
 
     @SuppressWarnings("unchecked")
-    private ProjectStatus internalGetProjectStatus(String name) throws XMLRPCException
+    private ProjectStatus internalGetProjectStatus(String name, long timestamp) throws XMLRPCException
     {
         Object[] builds = client.getLatestBuildsForProject(name, false, 2);
         BuildResult latestCompletedBuild = null;
@@ -103,7 +104,7 @@ public class Pulse implements IPulse
             }
         }
         
-        return new ProjectStatus(name, latestCompletedBuild, runningBuild);
+        return new ProjectStatus(name, latestCompletedBuild, runningBuild, timestamp);
     }
 
     @Override

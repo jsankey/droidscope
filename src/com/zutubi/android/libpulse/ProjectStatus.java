@@ -8,6 +8,7 @@ public class ProjectStatus
     private String projectName;
     private BuildResult latestCompletedBuild;
     private BuildResult runningBuild;
+    private long timestamp;
     
     /**
      * Creates a new status with the given project information.
@@ -17,13 +18,16 @@ public class ProjectStatus
      *                             or null if there is no such build
      * @param runningBuild         the currently-running build for the project,
      *                             or null if there is no such build
+     * @param timestamp            the time at which this status information
+     *                             was gathered (in millis since the epoch)
      */
-    public ProjectStatus(String projectName, BuildResult latestCompletedBuild, BuildResult runningBuild)
+    public ProjectStatus(String projectName, BuildResult latestCompletedBuild, BuildResult runningBuild, long timestamp)
     {
         super();
         this.projectName = projectName;
         this.latestCompletedBuild = latestCompletedBuild;
         this.runningBuild = runningBuild;
+        this.timestamp = timestamp;
     }
 
     /**
@@ -78,6 +82,18 @@ public class ProjectStatus
         {
             return Health.BROKEN;
         }
+    }
+    
+    /**
+     * Returns the time at which this status information was retrieved from the
+     * Pulse server.
+     * 
+     * @return the time this status was retrieved, in milliseconds since the
+     *         epoch
+     */
+    public long getTimestamp()
+    {
+        return timestamp;
     }
     
     @Override

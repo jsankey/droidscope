@@ -68,4 +68,32 @@ public class ProjectStatusCache
     {
         nameToStatusMap.clear();
     }
+    
+    /**
+     * Returns the oldest timestamp of all the statuses in this cache.  This
+     * indicates the age of the most out-of-date entry.
+     * 
+     * @return the timestamp of the most out-of-date entry in this cache, in
+     *         milliseconds since the epoch, or -1 if there are no entries
+     */
+    public long getOldestTimestamp()
+    {
+        if (nameToStatusMap.isEmpty())
+        {
+            return -1;
+        }
+        else
+        {
+            long oldest = Long.MAX_VALUE;
+            for (ProjectStatus s: nameToStatusMap.values())
+            {
+                if (s.getTimestamp() < oldest)
+                {
+                    oldest = s.getTimestamp();
+                }
+            }
+            
+            return oldest;
+        }
+    }
 }
