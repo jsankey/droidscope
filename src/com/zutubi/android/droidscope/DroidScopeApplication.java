@@ -2,14 +2,14 @@ package com.zutubi.android.droidscope;
 
 import java.io.IOException;
 
-import com.zutubi.android.libpulse.IPulse;
-import com.zutubi.android.libpulse.internal.Pulse;
-import com.zutubi.android.libpulse.internal.PulseClient;
-
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
+
+import com.zutubi.android.libpulse.IPulse;
+import com.zutubi.android.libpulse.internal.Pulse;
+import com.zutubi.android.libpulse.internal.PulseClient;
 
 /**
  * Global state for DroidScope.  Serves as a static registry, but allows
@@ -25,7 +25,7 @@ public class DroidScopeApplication extends Application implements OnSharedPrefer
     public void onCreate()
     {
         super.onCreate();
-        
+
         if (projectStatusCache == null)
         {
             projectStatusCache = new ProjectStatusCache();

@@ -4,6 +4,7 @@ import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;

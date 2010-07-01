@@ -5,11 +5,11 @@ import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Window;
 import android.widget.Toast;
 
 import com.zutubi.android.libpulse.IPulse;
@@ -23,12 +23,14 @@ public abstract class ActivitySupport extends Activity
 {
     protected ProjectStatusCache projectStatusCache;
     protected Dialog visibleDialog;
+    protected boolean inProgress = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         projectStatusCache = DroidScopeApplication.getProjectStatusCache();
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
     }
 
     protected void showErrorDialog(String message)
@@ -56,6 +58,11 @@ public abstract class ActivitySupport extends Activity
     {
         visibleDialog.hide();
         visibleDialog = null;
+    }
+    
+    public boolean isInProgress()
+    {
+        return inProgress;
     }
 
     /**
@@ -106,7 +113,8 @@ public abstract class ActivitySupport extends Activity
         @Override
         protected void onPreExecute()
         {
-            visibleDialog = ProgressDialog.show(ActivitySupport.this, "", getText(R.string.refreshing), true);
+            inProgress = true;
+            setProgressBarIndeterminateVisibility(inProgress);
         }
 
         @Override
@@ -139,18 +147,15 @@ public abstract class ActivitySupport extends Activity
         @Override
         protected void onPostExecute(RefreshResult result)
         {
+            inProgress = false;
+            setProgressBarIndeterminateVisibility(inProgress);
             if (result.isSuccessful())
             {
                 postRefresh();
-                hideDialog();
             }
             else if (result.error != null)
             {
                 showErrorDialog(result.error.getMessage());
-            }
-            else
-            {
-                hideDialog();
             }
         }
     }

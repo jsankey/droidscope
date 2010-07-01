@@ -2,7 +2,6 @@ package com.zutubi.android.droidscope.test;
 
 import java.util.ArrayList;
 
-import android.app.ProgressDialog;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.KeyEvent;
 import android.view.View;
@@ -48,10 +47,9 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
     {
         sendKeys(KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_R);
         getInstrumentation().waitForIdleSync();
-        ProgressDialog progressDialog = (ProgressDialog) activity.getVisibleDialog();
-        assertNotNull(progressDialog);
+        assertTrue(activity.isInProgress());
         pulse.releaseGetAllProjectStatuses();
-        waitForDialogToDisappear();
+        waitForRefreshToComplete();
         assertEquals(0, list.getTouchables().size());
     }
 
@@ -62,19 +60,19 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         sendKeys(KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_R);
         getInstrumentation().waitForIdleSync();
         pulse.releaseGetAllProjectStatuses();
-        waitForDialogToDisappear();
+        waitForRefreshToComplete();
         ArrayList<View> listItems = list.getTouchables();
         assertEquals(2, listItems.size());
         assertEquals("p1: ok", ((ProjectStatusView) listItems.get(0)).getStatus().toString());
         assertEquals("p2: ok", ((ProjectStatusView) listItems.get(1)).getStatus().toString());
     }
 
-    private void waitForDialogToDisappear()
+    private void waitForRefreshToComplete()
     {
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < 5000)
         {
-            if (activity.getVisibleDialog() == null)
+            if (!activity.isInProgress())
             {
                 getInstrumentation().waitForIdleSync();
                 return;
@@ -89,6 +87,6 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
             }
         }
 
-        fail("Timed out waiting for dialog to disappear");
+        fail("Timed out waiting for refresh to complete");
     }
 }
