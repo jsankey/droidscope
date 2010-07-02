@@ -2,8 +2,8 @@ package com.zutubi.android.droidscope.test;
 
 import java.util.ArrayList;
 
+import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase2;
-import android.view.KeyEvent;
 import android.view.View;
 
 import com.zutubi.android.droidscope.DroidScopeActivity;
@@ -21,7 +21,6 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
     public DroidScopeActivityTest()
     {
         super("com.zutubi.android.droidscope", DroidScopeActivity.class);
-        System.setProperty(DroidScopeActivity.PROPERTY_TEST_MODE, Boolean.TRUE.toString());
     }
 
     @Override
@@ -45,8 +44,9 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
     
     public void testNoProjects() throws Throwable
     {
-        sendKeys(KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_R);
-        getInstrumentation().waitForIdleSync();
+        Instrumentation instrumentation = getInstrumentation();
+        instrumentation.invokeMenuActionSync(activity, R.id.refresh, 0);
+        instrumentation.waitForIdleSync();
         assertTrue(activity.isInProgress());
         pulse.releaseGetAllProjectStatuses();
         waitForRefreshToComplete();
@@ -57,8 +57,9 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
     {
         pulse.setProjectNames("p1", "p2");
 
-        sendKeys(KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_R);
-        getInstrumentation().waitForIdleSync();
+        Instrumentation instrumentation = getInstrumentation();
+        instrumentation.invokeMenuActionSync(activity, R.id.refresh, 0);
+        instrumentation.waitForIdleSync();
         pulse.releaseGetAllProjectStatuses();
         waitForRefreshToComplete();
         ArrayList<View> listItems = list.getTouchables();

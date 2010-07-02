@@ -16,12 +16,6 @@ public class DroidScopeActivityLifeCycleTest extends InstrumentationTestCase
     private Activity droidScopeActivity;
     private Activity setupActivity;
     
-    public DroidScopeActivityLifeCycleTest()
-    {
-        super();
-        System.setProperty(DroidScopeActivity.PROPERTY_TEST_MODE, Boolean.TRUE.toString());
-    }
-    
     @Override
     protected void tearDown() throws Exception
     {        

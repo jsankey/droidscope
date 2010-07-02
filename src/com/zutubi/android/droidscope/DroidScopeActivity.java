@@ -1,7 +1,5 @@
 package com.zutubi.android.droidscope;
 
-import android.app.KeyguardManager;
-import android.app.KeyguardManager.KeyguardLock;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -23,8 +21,6 @@ import com.zutubi.android.libpulse.ProjectStatus;
  */
 public class DroidScopeActivity extends ActivitySupport implements OnItemClickListener
 {
-    public static final String PROPERTY_TEST_MODE = "droidscope.test";
-
     private static final int ID_CONTEXT_TRIGGER = 1;
  
     private ProjectStatusAdapter adapter;
@@ -33,13 +29,6 @@ public class DroidScopeActivity extends ActivitySupport implements OnItemClickLi
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
-        if (Boolean.getBoolean(PROPERTY_TEST_MODE))
-        {
-            KeyguardManager keyGuardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-            KeyguardLock lock = keyGuardManager.newKeyguardLock(getClass().getName());
-            lock.disableKeyguard();
-        }
 
         setContentView(R.layout.main);
         ListView list = (ListView) findViewById(R.id.list);
