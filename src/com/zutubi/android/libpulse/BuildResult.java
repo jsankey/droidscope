@@ -8,7 +8,7 @@ public class BuildResult
     private int number;
     private ResultStatus status;
     private String revision;
-    private String tests;
+    private TestSummary testSummary;
     private long startTime;
     private long endTime;
     private int progress;
@@ -16,18 +16,24 @@ public class BuildResult
     /**
      * Creates a new build with the given details.
      * 
-     * @param number   the build number (also known as the id)
-     * @param status   current status of the build
-     * @param progress for in progress builds, their estimated percentage
-     *                 complete (0-100); may be -1 if no estimate can be made
+     * @param number      the build number (also known as the id)
+     * @param status      current status of the build
+     * @param revision    revision that was built (may be null)
+     * @param testSummary a summary of the tests found in the build
+     * @param startTime   the time the build started in millis since the epoch,
+     *                    or -1 if the build has yet to start
+     * @param endTime     the time the build completed in millis since the
+     *                    epoch, or -1 if the build has yet to end
+     * @param progress    for in progress builds, their estimated percentage
+     *                    complete (0-100); may be -1 if no estimate was made
      */
-    public BuildResult(int number, ResultStatus status, String revision, String tests, long startTime, long endTime, int progress)
+    public BuildResult(int number, ResultStatus status, String revision, TestSummary testSummary, long startTime, long endTime, int progress)
     {
         super();
         this.number = number;
         this.status = status;
         this.revision = revision;
-        this.tests = tests;
+        this.testSummary = testSummary;
         this.startTime = startTime;
         this.endTime = endTime;
         this.progress = progress;
@@ -65,14 +71,13 @@ public class BuildResult
     }
     
     /**
-     * Returns a short summary string describing the test results for the
-     * build.
+     * Returns a summary of the test results for the build.
      * 
-     * @return a short summary of the test results, e.g. "all 33 passed"
+     * @return a summary of the test results
      */
-    public String getTests()
+    public TestSummary getTests()
     {
-        return tests;
+        return testSummary;
     }
     
     /**
@@ -132,7 +137,7 @@ public class BuildResult
         result = prime * result + ((revision == null) ? 0 : revision.hashCode());
         result = prime * result + (int) (startTime ^ (startTime >>> 32));
         result = prime * result + ((status == null) ? 0 : status.hashCode());
-        result = prime * result + ((tests == null) ? 0 : tests.hashCode());
+        result = prime * result + ((testSummary == null) ? 0 : testSummary.hashCode());
         return result;
     }
 
@@ -183,14 +188,14 @@ public class BuildResult
         {
             return false;
         }
-        if (tests == null)
+        if (testSummary == null)
         {
-            if (other.tests != null)
+            if (other.testSummary != null)
             {
                 return false;
             }
         }
-        else if (!tests.equals(other.tests))
+        else if (!testSummary.equals(other.testSummary))
         {
             return false;
         }

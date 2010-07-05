@@ -11,7 +11,6 @@ import com.zutubi.android.libpulse.BuildResult;
 import com.zutubi.android.libpulse.IPulse;
 import com.zutubi.android.libpulse.ProjectStatus;
 import com.zutubi.android.libpulse.PulseException;
-import com.zutubi.android.libpulse.ResultStatus;
 
 /**
  * Default implementation of the {@link IPulse} interface.  Uses an
@@ -90,7 +89,7 @@ public class Pulse implements IPulse
         BuildResult runningBuild = null;
         if (builds.length > 0)
         {
-            BuildResult latestBuild = convertBuild((Map<String, Object>) builds[0]);
+            BuildResult latestBuild = StructConverter.convertBuild((Map<String, Object>) builds[0]);
             if (latestBuild.isComplete())
             {
                 latestCompletedBuild = latestBuild;
@@ -100,7 +99,7 @@ public class Pulse implements IPulse
                 runningBuild = latestBuild;
                 if (builds.length > 1)
                 {
-                    latestCompletedBuild = convertBuild((Map<String, Object>) builds[1]);
+                    latestCompletedBuild = StructConverter.convertBuild((Map<String, Object>) builds[1]);
                 }
             }
         }
@@ -121,91 +120,6 @@ public class Pulse implements IPulse
         }
     }
     
-    private BuildResult convertBuild(Map<String, Object> map)
-    {
-        return new BuildResult(
-                (Integer) map.get("id"),
-                convertStatus((String) map.get("status")),
-                (String) map.get("revision"),
-                getTests(map),
-                getLong(map, "startTimeMillis"),
-                getLong(map, "endTimeMillis"),
-                getInt(map, "progress"));
-    }
-
-    private String getTests(Map<String, Object> map)
-    {
-        Object value = map.get("tests");
-        if (value == null)
-        {
-            return null;
-        }
-        else
-        {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> testSummary = (Map<String, Object>) value;
-            int total = (Integer) testSummary.get("total");
-            if (total == 0)
-            {
-                return "none";
-            }
-            else
-            {
-                int passed = (Integer) testSummary.get("passed");
-                int skipped = (Integer) testSummary.get("skipped");
-                String message;
-                
-                if (passed == total - skipped)
-                {
-                    message = String.format("all %d passed", passed);
-                }
-                else
-                {
-                    message = String.format("%d of %d broken", total - skipped - passed, total - skipped);
-                }
-                
-                if (skipped > 0)
-                {
-                    message += String.format(" (%d skipped)", skipped);
-                }
-            
-                return message;
-            }
-        }
-    }
-
-    private long getLong(Map<String, Object> map, String key)
-    {
-        String value = (String) map.get(key);
-        if (value == null)
-        {
-            return -1;
-        }
-        else
-        {
-            return Long.parseLong(value);
-        }
-    }
-
-    private int getInt(Map<String, Object> map, String key)
-    {
-        Integer value = (Integer) map.get(key);
-        if (value == null)
-        {
-            return -1;
-        }
-        else
-        {
-            return value.intValue();
-        }
-    }
-
-    private ResultStatus convertStatus(String s)
-    {
-        s = s.toUpperCase().replaceAll(" ", "_");
-        return ResultStatus.valueOf(s);
-    }
-
     @Override
     public void close() throws IOException
     {

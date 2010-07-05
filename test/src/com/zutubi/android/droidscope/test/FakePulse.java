@@ -9,6 +9,7 @@ import com.zutubi.android.libpulse.BuildResult;
 import com.zutubi.android.libpulse.IPulse;
 import com.zutubi.android.libpulse.ProjectStatus;
 import com.zutubi.android.libpulse.ResultStatus;
+import com.zutubi.android.libpulse.TestSummary;
 
 /**
  * A testing implementation of the {@link IPulse} interface.
@@ -37,7 +38,7 @@ class FakePulse implements IPulse
         List<ProjectStatus> statuses = new LinkedList<ProjectStatus>();
         for (String name: names)
         {
-            statuses.add(new ProjectStatus(name, new BuildResult(1, ResultStatus.SUCCESS, "rev", "tests", 0, 0, 100), null, 0));
+            statuses.add(new ProjectStatus(name, new BuildResult(1, ResultStatus.SUCCESS, "rev", new TestSummary(), 0, 0, 100), null, 0));
         }
         
         return statuses;

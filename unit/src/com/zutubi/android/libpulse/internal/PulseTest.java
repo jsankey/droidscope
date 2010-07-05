@@ -12,6 +12,7 @@ import org.xmlrpc.android.XMLRPCException;
 import com.zutubi.android.libpulse.BuildResult;
 import com.zutubi.android.libpulse.ProjectStatus;
 import com.zutubi.android.libpulse.ResultStatus;
+import com.zutubi.android.libpulse.TestSummary;
 
 public class PulseTest
 {
@@ -135,7 +136,7 @@ public class PulseTest
     
     private BuildResult build(int id, ResultStatus status)
     {
-        return new BuildResult(id, status, null, null, -1, -1, -1);
+        return new BuildResult(id, status, null, new TestSummary(), -1, -1, -1);
     }
 
     private ProjectStatus emptyStatus(String project)
