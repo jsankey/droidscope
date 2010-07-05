@@ -10,6 +10,7 @@ import org.xmlrpc.android.XMLRPCException;
 import com.zutubi.android.libpulse.BuildResult;
 import com.zutubi.android.libpulse.IPulse;
 import com.zutubi.android.libpulse.ProjectStatus;
+import com.zutubi.android.libpulse.PulseException;
 import com.zutubi.android.libpulse.ResultStatus;
 
 /**
@@ -40,7 +41,7 @@ public class Pulse implements IPulse
         }
         catch (XMLRPCException e)
         {
-            throw new RuntimeException(e);
+            throw new PulseException(e);
         }
     }
 
@@ -53,7 +54,7 @@ public class Pulse implements IPulse
         }
         catch (XMLRPCException e)
         {
-            throw new RuntimeException(e);
+            throw new PulseException(e);
         }
     }
 
@@ -77,7 +78,7 @@ public class Pulse implements IPulse
         }
         catch (XMLRPCException e)
         {
-            throw new RuntimeException(e);
+            throw new PulseException(e);
         }
     }
 
@@ -129,7 +130,7 @@ public class Pulse implements IPulse
                 getTests(map),
                 getLong(map, "startTimeMillis"),
                 getLong(map, "endTimeMillis"),
-                (Integer) map.get("progress"));
+                getInt(map, "progress"));
     }
 
     private String getTests(Map<String, Object> map)
@@ -183,6 +184,19 @@ public class Pulse implements IPulse
         else
         {
             return Long.parseLong(value);
+        }
+    }
+
+    private int getInt(Map<String, Object> map, String key)
+    {
+        Integer value = (Integer) map.get(key);
+        if (value == null)
+        {
+            return -1;
+        }
+        else
+        {
+            return value.intValue();
         }
     }
 

@@ -120,4 +120,80 @@ public class BuildResult
     {
         return status.isComplete();
     }
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (endTime ^ (endTime >>> 32));
+        result = prime * result + number;
+        result = prime * result + progress;
+        result = prime * result + ((revision == null) ? 0 : revision.hashCode());
+        result = prime * result + (int) (startTime ^ (startTime >>> 32));
+        result = prime * result + ((status == null) ? 0 : status.hashCode());
+        result = prime * result + ((tests == null) ? 0 : tests.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+        {
+            return true;
+        }
+        if (obj == null)
+        {
+            return false;
+        }
+        if (getClass() != obj.getClass())
+        {
+            return false;
+        }
+        BuildResult other = (BuildResult) obj;
+        if (endTime != other.endTime)
+        {
+            return false;
+        }
+        if (number != other.number)
+        {
+            return false;
+        }
+        if (progress != other.progress)
+        {
+            return false;
+        }
+        if (revision == null)
+        {
+            if (other.revision != null)
+            {
+                return false;
+            }
+        }
+        else if (!revision.equals(other.revision))
+        {
+            return false;
+        }
+        if (startTime != other.startTime)
+        {
+            return false;
+        }
+        if (status != other.status)
+        {
+            return false;
+        }
+        if (tests == null)
+        {
+            if (other.tests != null)
+            {
+                return false;
+            }
+        }
+        else if (!tests.equals(other.tests))
+        {
+            return false;
+        }
+        return true;
+    }
 }

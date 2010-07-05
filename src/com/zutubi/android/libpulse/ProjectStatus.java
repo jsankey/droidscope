@@ -97,6 +97,69 @@ public class ProjectStatus
     }
     
     @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((latestCompletedBuild == null) ? 0 : latestCompletedBuild.hashCode());
+        result = prime * result + ((projectName == null) ? 0 : projectName.hashCode());
+        result = prime * result + ((runningBuild == null) ? 0 : runningBuild.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+        {
+            return true;
+        }
+        if (obj == null)
+        {
+            return false;
+        }
+        if (getClass() != obj.getClass())
+        {
+            return false;
+        }
+        ProjectStatus other = (ProjectStatus) obj;
+        if (latestCompletedBuild == null)
+        {
+            if (other.latestCompletedBuild != null)
+            {
+                return false;
+            }
+        }
+        else if (!latestCompletedBuild.equals(other.latestCompletedBuild))
+        {
+            return false;
+        }
+        if (projectName == null)
+        {
+            if (other.projectName != null)
+            {
+                return false;
+            }
+        }
+        else if (!projectName.equals(other.projectName))
+        {
+            return false;
+        }
+        if (runningBuild == null)
+        {
+            if (other.runningBuild != null)
+            {
+                return false;
+            }
+        }
+        else if (!runningBuild.equals(other.runningBuild))
+        {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String toString()
     {
         return projectName + ": " + getHealth().name().toLowerCase();
