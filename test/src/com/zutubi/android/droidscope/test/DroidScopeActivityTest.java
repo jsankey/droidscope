@@ -15,8 +15,10 @@ import com.zutubi.android.droidscope.R;
 public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<DroidScopeActivity>
 {
     private DroidScopeActivity activity;
-    private View               list;
+    private Instrumentation    instrumentation;
     private FakePulse          pulse;
+    private FakeSettings       settings;
+    private View               list;
 
     public DroidScopeActivityTest()
     {
@@ -29,10 +31,13 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         super.setUp();
         
         setActivityInitialTouchMode(false);
-
+        instrumentation = getInstrumentation();
+        instrumentation.waitForIdleSync();
+        
         pulse = new FakePulse();
         
-        DroidScopeApplication.setSettings(new FakeSettings("http://localhost", "admin", "admin"));
+        settings = new FakeSettings("http://localhost", "admin", "admin");
+        DroidScopeApplication.setSettings(settings);
         DroidScopeApplication.setProjectStatusCache(new ProjectStatusCache());
         DroidScopeApplication.setPulse(pulse);
 
@@ -44,7 +49,7 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
     
     public void testNoProjects() throws Throwable
     {
-        Instrumentation instrumentation = getInstrumentation();
+        pulse.setWaitOnProjectStatuses(true);
         instrumentation.invokeMenuActionSync(activity, R.id.refresh, 0);
         instrumentation.waitForIdleSync();
         assertTrue(activity.isInProgress());
@@ -57,15 +62,70 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
     {
         pulse.setProjectNames("p1", "p2");
 
-        Instrumentation instrumentation = getInstrumentation();
         instrumentation.invokeMenuActionSync(activity, R.id.refresh, 0);
         instrumentation.waitForIdleSync();
-        pulse.releaseGetAllProjectStatuses();
         waitForRefreshToComplete();
         ArrayList<View> listItems = list.getTouchables();
         assertEquals(2, listItems.size());
         assertEquals("p1: ok", ((ProjectStatusView) listItems.get(0)).getStatus().toString());
         assertEquals("p2: ok", ((ProjectStatusView) listItems.get(1)).getStatus().toString());
+    }
+    
+    public void testNoRefreshOnResume() throws Throwable
+    {
+        assertEquals(0, list.getTouchables().size());
+
+        pulse.setProjectNames("p1");
+        settings.setStaleAge(0);
+        activity.setLastRefreshTime(System.currentTimeMillis());
+        
+        pauseAndResume();
+        
+        assertEquals(0, list.getTouchables().size());
+    }
+
+    public void testRefreshOnResume() throws Throwable
+    {
+        assertEquals(0, list.getTouchables().size());
+
+        pulse.setProjectNames("p1");
+        settings.setRefreshOnResume(true);
+        settings.setStaleAge(0);
+        activity.setLastRefreshTime(System.currentTimeMillis() - 1000000);
+        
+        pauseAndResume();
+        
+        assertEquals(1, list.getTouchables().size());
+    }
+
+    public void testRefreshOnResumeNotStale() throws Throwable
+    {
+        assertEquals(0, list.getTouchables().size());
+
+        pulse.setProjectNames("p1");
+        pulse.setTimestamp(Long.MAX_VALUE);
+        settings.setRefreshOnResume(true);
+        settings.setStaleAge(1000000);
+        activity.setLastRefreshTime(System.currentTimeMillis());
+        
+        pauseAndResume();
+        
+        assertEquals(0, list.getTouchables().size());
+    }
+
+    private void pauseAndResume()
+    {
+        activity.runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                instrumentation.callActivityOnPause(activity);
+                instrumentation.callActivityOnResume(activity);
+            }
+        });
+
+        waitForRefreshToComplete();
     }
 
     private void waitForRefreshToComplete()

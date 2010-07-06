@@ -10,7 +10,13 @@ import com.zutubi.android.libpulse.ProjectStatus;
  * Simple utilities for UI code that have no other home.
  */
 public class UiUtils
-{    
+{
+    /**
+     * Flag the allows animations to be disabled.  Useful for testing, as
+     * animations and waiting for idle do not play nicely together.
+     */
+    public static boolean ENABLE_ANIMATIONS = true;
+    
     /**
      * Converts a project health value into the resource id for a corresponding
      * icon.  For example, the health {@link Health#OK} returns the id of a
@@ -44,7 +50,7 @@ public class UiUtils
      */
     public static Animation getProjectAnimation(ProjectStatus status)
     {
-        if (status.getRunningBuild() == null)
+        if (status.getRunningBuild() == null || !ENABLE_ANIMATIONS)
         {
             return null;
         }

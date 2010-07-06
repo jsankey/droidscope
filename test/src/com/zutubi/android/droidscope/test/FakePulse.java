@@ -16,15 +16,20 @@ import com.zutubi.android.libpulse.TestSummary;
  */
 class FakePulse implements IPulse
 {
+    private boolean   waitOnProjectStatuses     = false;
     private Semaphore getAllProjectStatusesFlag = new Semaphore(0);
     private String[]  projectNames              = new String[0];
-
+    private long      timestamp                 = 0;
+    
     @Override
     public List<ProjectStatus> getAllProjectStatuses()
     {
         try
         {
-            getAllProjectStatusesFlag.acquire();
+            if (waitOnProjectStatuses)
+            {
+                getAllProjectStatusesFlag.acquire();
+            }
             return getProjectStatuses(projectNames);
         }
         catch (InterruptedException e)
@@ -38,7 +43,7 @@ class FakePulse implements IPulse
         List<ProjectStatus> statuses = new LinkedList<ProjectStatus>();
         for (String name: names)
         {
-            statuses.add(new ProjectStatus(name, new BuildResult(1, ResultStatus.SUCCESS, "rev", new TestSummary(), 0, 0, 100), null, 0));
+            statuses.add(new ProjectStatus(name, new BuildResult(1, ResultStatus.SUCCESS, "rev", new TestSummary(), 0, 0, 100), null, timestamp));
         }
         
         return statuses;
@@ -65,12 +70,22 @@ class FakePulse implements IPulse
     {
         getAllProjectStatusesFlag.release();
     }
+    
+    public void setWaitOnProjectStatuses(boolean waitOnProjectStatuses)
+    {
+        this.waitOnProjectStatuses = waitOnProjectStatuses;
+    }
 
     public void setProjectNames(String... projectNames)
     {
         this.projectNames = projectNames;
     }
 
+    public void setTimestamp(long timestamp)
+    {
+        this.timestamp = timestamp;
+    }
+    
     @Override
     public void close() throws IOException
     {

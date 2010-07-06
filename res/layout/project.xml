@@ -26,6 +26,14 @@
 		      android:id="@+id/project_name">
 		    </TextView>
 	    </LinearLayout>
+	    <TextView
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:text="project message"
+		  android:textSize="14dip"
+	      android:padding="4dip"
+	      android:id="@+id/project_message">
+	    </TextView>
 	    <TableLayout
 	      android:id="@+id/project_current_build_table"
 	      android:layout_width="fill_parent"

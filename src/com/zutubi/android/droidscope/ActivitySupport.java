@@ -25,6 +25,7 @@ public abstract class ActivitySupport extends Activity
     protected ISettings settings;
     protected Dialog visibleDialog;
     protected boolean inProgress = false;
+    protected long lastRefreshTime = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -74,7 +75,12 @@ public abstract class ActivitySupport extends Activity
     public boolean isStale(long timestamp)
     {
         long age = (System.currentTimeMillis() - timestamp) / 1000;
-        return settings.getStaleAge() < age;
+        return settings.getStaleAge() <= age;
+    }
+
+    public void setLastRefreshTime(long lastRefreshTime)
+    {
+        this.lastRefreshTime = lastRefreshTime;
     }
     
     /**
@@ -132,6 +138,7 @@ public abstract class ActivitySupport extends Activity
         @Override
         protected RefreshResult doInBackground(String... params)
         {
+            lastRefreshTime = System.currentTimeMillis();
             IPulse pulse = DroidScopeApplication.getPulse();
             try
             {

@@ -54,9 +54,18 @@ public class DroidScopeActivity extends ActivitySupport implements OnItemClickLi
         {
             startActivity(new Intent(this, SetupConnectionActivity.class));
         }
-        else if (settings.isRefreshOnResume() && isStale(projectStatusCache.getOldestTimestamp()))
+        else
         {
-            refresh();
+            long timestamp = projectStatusCache.getOldestTimestamp();
+            if (timestamp == -1)
+            {
+                timestamp = lastRefreshTime;
+            }
+            
+            if (settings.isRefreshOnResume() && isStale(timestamp))
+            {
+                refresh();
+            }
         }
     }
 

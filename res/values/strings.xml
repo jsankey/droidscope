@@ -25,6 +25,7 @@
     
     <string name="project_current_build">build in progress</string>
     <string name="project_completed_build">latest completed build</string>
+    <string name="project_unknown">this project does not exist</string>
     <string name="project_never_built">this project has never been built</string>
     <string name="build_id">id</string>
     <string name="build_status">status</string>

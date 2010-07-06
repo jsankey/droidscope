@@ -14,6 +14,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.zutubi.android.libpulse.BuildResult;
+import com.zutubi.android.libpulse.Health;
 import com.zutubi.android.libpulse.ProjectStatus;
 
 /**
@@ -26,7 +27,9 @@ public class ProjectActivity extends ActivitySupport
     private String projectName;
     private LinearLayout containerLayout;
     private ImageView healthImage;
+    private TextView messageText;
     private ProjectStatusCache projectStatusCache;
+
     
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -36,6 +39,10 @@ public class ProjectActivity extends ActivitySupport
         projectStatusCache = DroidScopeApplication.getProjectStatusCache();
         
         setContentView(R.layout.project);
+        containerLayout = (LinearLayout) findViewById(R.id.project_container);
+        healthImage = (ImageView) findViewById(R.id.project_health_icon);
+        messageText = (TextView) findViewById(R.id.project_message);
+        
         Bundle extras = getIntent().getExtras();
         if (extras != null)
         {
@@ -108,11 +115,18 @@ public class ProjectActivity extends ActivitySupport
     
     private void showProject()
     {
-        containerLayout = (LinearLayout) findViewById(R.id.project_container);
-        healthImage = (ImageView) findViewById(R.id.project_health_icon);
 
         ProjectStatus status = projectStatusCache.findByProjectName(projectName);
-        if (status != null)
+        if (status == null)
+        {
+            healthImage.setImageResource(UiUtils.healthToResourceId(Health.UNKNOWN));
+            healthImage.setAnimation(null);
+            messageText.setText(R.string.project_unknown);
+            messageText.setVisibility(View.VISIBLE);
+            findViewById(R.id.project_current_build_table).setVisibility(View.GONE);
+            findViewById(R.id.project_completed_build_table).setVisibility(View.GONE);
+        }
+        else
         {
             healthImage.setImageResource(UiUtils.healthToResourceId(status.getHealth()));
             healthImage.setAnimation(UiUtils.getProjectAnimation(status));
@@ -122,9 +136,12 @@ public class ProjectActivity extends ActivitySupport
                     R.id.project_completed_build_table);
             if (currentBuild == null && completedBuild == null)
             {
-                TextView textView = new TextView(this);
-                textView.setText(R.string.project_never_built);
-                containerLayout.addView(textView);
+                messageText.setText(R.string.project_never_built);
+                messageText.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                messageText.setVisibility(View.GONE);
             }
         }
         
