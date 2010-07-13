@@ -33,10 +33,15 @@
          should be checked in in Version Control Systems. -->
     <property file="default.properties" />
 
+    <property name="reports.dir" value="${out.dir}/reports"/>
+
     <!-- Can be overridden if you want multiple emulators running.  Must be even, and between
          5554 and 5584. -->
     <property name="emulator.port" value="5554"/>
     <property name="adb.device.arg" value="-s emulator-${emulator.port}"/>
+
+    <!-- Custom test runner that produces XML reports. -->
+    <property name="test.runner" value="com.zutubi.android.junitreport.JUnitReportTestRunner"/>
 
     <!-- Custom Android task to deal with the project target, and import the proper rules.
          This requires ant 1.6.0 or above. -->
@@ -72,8 +77,8 @@
 	 out.dir.  We instead assume it is the same as our own (a little lazy - we could
 	 also load it, but it seems too much effort to support inconsistent paths). -->
     <property name="extensible.classpath" value="${tested.project.absolute.dir}/${out.dir}/classes"/>
-
-    <!-- Overrides the default android rule to respect ${adb.device.arg}. -->
+    
+    <!-- Overrides the default android rule to respect ${adb.device.arg} and pull our XML report. -->
     <target name="run-tests" depends="-install-tested-project, install"
                 description="Runs tests from the package defined in test.package property">
         <exec executable="${adb}" failonerror="true">
@@ -86,6 +91,14 @@
             <arg value="coverage" />
             <arg value="@{emma.enabled}" />
             <arg value="${manifest.package}/${test.runner}" />
+        </exec>
+        <echo>Downloading XML test report...</echo>
+	<mkdir dir="${reports.dir}"/>
+        <exec executable="${adb}" failonerror="true">
+	    <arg line="${adb.device.arg}"/>
+            <arg value="pull" />
+            <arg value="/data/data/${tested.manifest.package}/files/junit-report.xml" />
+            <arg value="${reports.dir}/junit-report.xml" />
         </exec>
     </target>
 

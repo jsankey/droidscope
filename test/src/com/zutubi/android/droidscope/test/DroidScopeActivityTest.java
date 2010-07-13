@@ -55,13 +55,12 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         assertTrue(activity.isInProgress());
         pulse.releaseGetAllProjectStatuses();
         waitForRefreshToComplete();
-        assertEquals(0, list.getTouchables().size());
+        assertEquals(5, list.getTouchables().size());
     }
 
     public void testProjects() throws Throwable
     {
         pulse.setProjectNames("p1", "p2");
-
         instrumentation.invokeMenuActionSync(activity, R.id.refresh, 0);
         instrumentation.waitForIdleSync();
         waitForRefreshToComplete();
@@ -69,6 +68,7 @@ public class DroidScopeActivityTest extends ActivityInstrumentationTestCase2<Dro
         assertEquals(2, listItems.size());
         assertEquals("p1: ok", ((ProjectStatusView) listItems.get(0)).getStatus().toString());
         assertEquals("p2: ok", ((ProjectStatusView) listItems.get(1)).getStatus().toString());
+        throw new RuntimeException("arrg");
     }
     
     public void testNoRefreshOnResume() throws Throwable

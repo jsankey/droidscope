@@ -9,5 +9,5 @@
 	<uses-sdk android:minSdkVersion="3" />
 	
 	<instrumentation android:targetPackage="com.zutubi.android.droidscope"
-		android:name="android.test.InstrumentationTestRunner" />
+		android:name="com.zutubi.android.junitreport.JUnitReportTestRunner" />
 </manifest> 
