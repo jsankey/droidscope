@@ -74,15 +74,15 @@
     <setup />
 
     <!-- The default android test compiling rules assume your tested project uses a default
-	 out.dir.  We instead assume it is the same as our own (a little lazy - we could
-	 also load it, but it seems too much effort to support inconsistent paths). -->
+         out.dir.  We instead assume it is the same as our own (a little lazy - we could
+         also load it, but it seems too much effort to support inconsistent paths). -->
     <property name="extensible.classpath" value="${tested.project.absolute.dir}/${out.dir}/classes"/>
     
     <!-- Overrides the default android rule to respect ${adb.device.arg} and pull our XML report. -->
     <target name="run-tests" depends="-install-tested-project, install"
                 description="Runs tests from the package defined in test.package property">
         <exec executable="${adb}" failonerror="true">
-	    <arg line="${adb.device.arg}"/>
+            <arg line="${adb.device.arg}"/>
             <arg value="shell" />
             <arg value="am" />
             <arg value="instrument" />
@@ -93,9 +93,9 @@
             <arg value="${manifest.package}/${test.runner}" />
         </exec>
         <echo>Downloading XML test report...</echo>
-	<mkdir dir="${reports.dir}"/>
+        <mkdir dir="${reports.dir}"/>
         <exec executable="${adb}" failonerror="true">
-	    <arg line="${adb.device.arg}"/>
+            <arg line="${adb.device.arg}"/>
             <arg value="pull" />
             <arg value="/data/data/${tested.manifest.package}/files/junit-report.xml" />
             <arg value="${reports.dir}/junit-report.xml" />
@@ -105,20 +105,20 @@
     <property name="emulator.pid.file" value="emulator.properties"/>
     <target name="start-emulator">
         <exec executable="bash" spawn="true">
-	    <arg line="./exec.sh ${emulator.pid.file} emulator.pid ${sdk.dir}/tools/emulator -avd ${avd} -no-window -port ${emulator.port}"/>
-	</exec>
-	<exec executable="${sdk.dir}/tools/adb">
-	    <arg line="${adb.device.arg} -e wait-for-device"/>
-	</exec>
+            <arg line="./exec.sh ${emulator.pid.file} emulator.pid ${sdk.dir}/tools/emulator -avd ${avd} -no-window -port ${emulator.port}"/>
+        </exec>
+        <exec executable="${sdk.dir}/tools/adb">
+            <arg line="${adb.device.arg} -e wait-for-device"/>
+        </exec>
         <sleep seconds="5"/>
     </target>
 
     <target name="stop-emulator">
-	<property file="${emulator.pid.file}"/>
-	<exec executable="kill">
-	    <arg line="${emulator.pid}"/>
-	</exec>
-	<delete file="${emulator.pid.file}"/>
+        <property file="${emulator.pid.file}"/>
+        <exec executable="kill">
+            <arg line="${emulator.pid}"/>
+        </exec>
+        <delete file="${emulator.pid.file}"/>
     </target>
 
     <target name="ci" depends="start-emulator,run-tests,stop-emulator"/>

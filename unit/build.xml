@@ -26,9 +26,9 @@
     </target>
     
     <target name="-init">
-    	<mkdir dir="${out.dir}"/>
-    	<mkdir dir="${classes.dir}"/>
-    	<mkdir dir="${reports.dir}"/>
+        <mkdir dir="${out.dir}"/>
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${reports.dir}"/>
     </target>
     
     <target name="-compile-tested">
